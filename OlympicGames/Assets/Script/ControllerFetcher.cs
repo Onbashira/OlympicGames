@@ -10,7 +10,7 @@ public static class ControllerFetcher
     [SerializeField]
     private static int maxConnectedNum = 0; //現在つながれているコントローラ数
 
-    private static int maxSupportedNum = 4; //デフォルトで4つ
+    private const int MAX_SUPPORTED_NUM = 4; //デフォルトで4つ
 
     // Use this for initialization
     public static void Initialize()
@@ -18,7 +18,8 @@ public static class ControllerFetcher
 
         var controllerNames = Input.GetJoystickNames();
         int controllerNum = 0;
-        for (int i = 0; i < maxSupportedNum; ++i)
+        //既に接続されているものから名前があるもの（現在接続されているもの）の数を抽出
+        for (int i = 0; i < MAX_SUPPORTED_NUM; ++i)
         {
             if (controllerNames[i] != "")
             {
@@ -37,9 +38,9 @@ public static class ControllerFetcher
 
     public static GamepadInput.GamepadState GetPadState(uint playerNo, bool raw = false)
     {
-        if (playerNo < 0 || playerNo > maxConnectedNum)
+        if (playerNo > maxConnectedNum)
         {
-            Debug.Log("Error");
+            UnityEngine.Assertions.Assert.IsTrue(playerNo <= maxConnectedNum,"取得しようとしたインデックス値が無効なため");
         }
         return GamepadInput.GamePad.GetState((GamePad.Index)playerNo, raw);
     }
