@@ -11,25 +11,14 @@ public class Fade : MonoBehaviour
     float cutoutRange;
 
     [SerializeField]
-    private bool fadeInIsCompleted;
+    private bool fadeInIsCompleted { set; get; }
     [SerializeField]
-    private bool fadeOutisCompleted;
-    //[SerializeField]
-    //private float fadetime = 0.0f;
-    //[SerializeField]
-    //[Range(0.0f,1.0f)]
-    //private float delta = 0.01f;//増分
-    //[SerializeField]
-    //private  float maxFadeTime = 5.0f;
-    //[SerializeField]
-    //private delegate void FadeUpdater();
-    //FadeUpdater fadeUpdater;
+    private bool fadeOutIsCompleted { set; get; }
 
     // Use this for initialization
     void Start()
     {
-        //fadeUpdater = FadeInUpdater;
-        fadeOutisCompleted = false;
+        fadeOutIsCompleted = false;
         fadeInIsCompleted = false;
         Init();
         fader.Range = cutoutRange;
@@ -38,7 +27,7 @@ public class Fade : MonoBehaviour
     void Init()
     {
         fader = GetComponent<IFade>();
-        fadeOutisCompleted = false;
+        fadeOutIsCompleted = false;
         fadeInIsCompleted = false;
     }
 
@@ -52,21 +41,23 @@ public class Fade : MonoBehaviour
     {
         float endTime = Time.timeSinceLevelLoad + time * (cutoutRange);
         var endFrame = new WaitForEndOfFrame();
-        while(Time.timeSinceLevelLoad <= endTime)
+        while (Time.timeSinceLevelLoad <= endTime)
         {
-            cutoutRange = (endTime - Time.timeSinceLevelLoad) / time;
+            cutoutRange = 1.0f - (endTime - Time.timeSinceLevelLoad) / time;
             fader.Range = cutoutRange;
             yield return endFrame;
         }
-        cutoutRange = 0;
-        fadeOutisCompleted = true;
+        cutoutRange = 0.0f;
+        fadeOutIsCompleted = true;
         fader.Range = cutoutRange;
-        
+
         //callback
         if (action != null)
         {
             action();
+
         }
+        fadeOutIsCompleted = false;
     }
 
     IEnumerator FadeInCoroutine(float time, System.Action action)
@@ -75,7 +66,7 @@ public class Fade : MonoBehaviour
         var endFrame = new WaitForEndOfFrame();
         while (Time.timeSinceLevelLoad <= endTime)
         {
-            cutoutRange = 1.0f - (endTime - Time.timeSinceLevelLoad) / time;
+            cutoutRange = (endTime - Time.timeSinceLevelLoad) / time;
             fader.Range = cutoutRange;
             yield return endFrame;
         }
@@ -88,6 +79,7 @@ public class Fade : MonoBehaviour
         {
             action();
         }
+        fadeInIsCompleted = false;
     }
 
     public Coroutine FadeOut(float time, System.Action action)
@@ -112,54 +104,14 @@ public class Fade : MonoBehaviour
         return FadeIn(time, null);
     }
 
-    //// Update is called once per frame
-    //void Update()
-    //{
-    //    fadeUpdater();
-    //}
+    public bool IsFadeOutCompleted()
+    {
+        return fadeOutIsCompleted;
+    }
 
-    //public void FadeOut()
-    //{
-    //    fadeOutisCompleted = true;
-    //}
+    public bool IsFadeInCompleted()
+    {
+        return fadeInIsCompleted;
+    }
 
-    //public bool IsFadeOutCompleted()
-    //{
-    //    return fadeOutisCompleted;
-    //}
-
-    //public bool IsFadeInCompleted()
-    //{
-    //    return fadeInIsCompleted;
-    //}
-
-    //private void FadeInUpdater()
-    //{
-    //    fadetime += delta;
-    //    if (fadetime >= maxFadeTime)
-    //    {
-    //        fadetime = maxFadeTime;
-    //        fadeUpdater = FadeNoneUpdater;
-
-    //    }
-    //}
-
-    //private void FadeNoneUpdater()
-    //{
-    //    if (fadeOutisCompleted)
-    //    {
-    //        fadeUpdater = FadeOutUpdater;
-    //        fadeOutisCompleted = false;
-    //    }
-    //}
-
-    //private void FadeOutUpdater()
-    //{
-    //    fadetime -= delta;
-    //    if (fadetime <= 0.0f)
-    //    {
-    //        fadetime = 0.0f;
-    //        fadeUpdater = FadeNoneUpdater;
-    //    }
-    //}
 }

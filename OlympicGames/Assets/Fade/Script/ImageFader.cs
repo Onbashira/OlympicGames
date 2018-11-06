@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ImageFader : UnityEngine.UI.Graphic , IFade{
+public class ImageFader : UnityEngine.UI.Graphic , IFade
+{
 
     [SerializeField,Range(0.0f,1.0f)]
-    private float cutoutRange;
+    private float cutoutRange = 1.0f;
     [SerializeField] Texture maskTexture = null;
 
     public float Range
@@ -35,10 +36,10 @@ public class ImageFader : UnityEngine.UI.Graphic , IFade{
 
         material.SetFloat("_Range", 1.0f - range);
 
-        if (range <= 0)
-        {
-            this.enabled = false;
-        }
+        //if (range <= 0)
+        //{
+        //    this.enabled = false;
+        //}
     }
 
     public void UpdateMaskTexture(Texture texture)
