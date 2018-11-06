@@ -3,7 +3,12 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - MapBlock
+  - Gimmick
+  - Wall
+  - Meteo
+  - BlackHole
   layers:
   - Default
   - TransparentFX
@@ -40,4 +45,25 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: BackGround
+    uniqueID: 2027793649
+    locked: 0
+  - name: MapFrame
+    uniqueID: 2715383019
+    locked: 0
+  - name: Wall
+    uniqueID: 4185810637
+    locked: 0
+  - name: Player
+    uniqueID: 2946968177
+    locked: 0
+  - name: Gimmik
+    uniqueID: 1847645681
+    locked: 0
+  - name: Effect
+    uniqueID: 1690220833
+    locked: 0
+  - name: UI
+    uniqueID: 3698088453
     locked: 0

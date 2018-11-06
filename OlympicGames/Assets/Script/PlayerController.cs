@@ -30,17 +30,23 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     bool isDown = false;
     [SerializeField]
-    bool isMassive = false;
+    bool isInvincible = false;
     [SerializeField]
     System.Action inputUpdater;
     [SerializeField]
     System.Action moveUpdater;
+    [SerializeField]
+    System.Action stateUpdater;
     [SerializeField]
     Vector2 respownPos;
     [SerializeField]
     float respownRotate;
     [SerializeField]
     float downTime = 3.0f;
+    float downtimer = 0.0f;
+    [SerializeField]
+    float invincibleTime = 3.0f;
+    float invincibleTimer = 0.0f;
     [SerializeField]
     private GamepadInput.GamepadState gamepadState;
     [SerializeField]
@@ -81,14 +87,34 @@ public class PlayerController : MonoBehaviour
         ClapmAngluerVelocity();
     }
 
+    private void LateUpdate()
+    {
+
+    }
+
     private void FixedUpdate()
     {
 
     }
 
-    private void LateUpdate()
+    public bool IsInvincible()
     {
+        return isInvincible;
+    }
 
+    public bool IsDead()
+    {
+        return isDead;
+    }
+
+    public bool IsDown()
+    {
+        return isDown;
+    }
+
+    public void Kill()
+    {
+        isDead = true;
     }
 
     void ClampVelocity()
@@ -113,8 +139,8 @@ public class PlayerController : MonoBehaviour
         if (!(rigid.velocity.SqrMagnitude().Equals(0.0f)) && gamepadState.B)
         {
             Vector2 dump = rvelo * brakeDump;
-            rigid.velocity -= dump * Time.fixedDeltaTime;
-            if (rigid.velocity.SqrMagnitude().Equals(0.0f))
+            rigid.velocity -= dump * Time.deltaTime;
+            if (rigid.velocity.SqrMagnitude() <= 0.001f)
             {
                 rigid.velocity = Vector2.zero;
             }
@@ -143,8 +169,9 @@ public class PlayerController : MonoBehaviour
         {
             tempVelo += Vector2.down;
         }
+
         tempVelo.Normalize();
-        tempVelo *= hoverMovePower * Time.fixedDeltaTime;
+        tempVelo *= hoverMovePower * Time.deltaTime;
         tempVelo.x = Mathf.Clamp(tempVelo.x, hoverClamp.x, hoverClamp.y);
         tempVelo.y = Mathf.Clamp(tempVelo.y, hoverClamp.x, hoverClamp.y);
 
@@ -154,14 +181,15 @@ public class PlayerController : MonoBehaviour
 
     void Charge()
     {
-        if (gamepadState.A) {
-            chargeTime += 1.0f * Time.fixedDeltaTime;
+        if (gamepadState.A)
+        {
+            chargeTime += 1.0f * Time.deltaTime;
             if (chargeTime >= maxChargeTime)
             {
                 chargeTime = maxChargeTime;
             }
         }
-        
+
 
         if (!gamepadState.A)
         {
@@ -176,6 +204,31 @@ public class PlayerController : MonoBehaviour
             chargeTime = 0.0f;
             moveUpdater = Normal;
             return;
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        //他プレイヤーとの衝突時
+        if (collision.gameObject.tag == "Player")
+        {
+            PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+            if (player.moveVelocity.SqrMagnitude() >= moveVelocity.SqrMagnitude())
+            {
+                isDown = true;
+                moveUpdater = Downed;
+                chargeTime = 0.0f;
+
+            }
+
+        }
+        else if (collision.gameObject.tag == "Gimmick") //ギミックとの衝突時
+        {
+
+        }
+        else if (collision.gameObject.tag == "Wall") //壁との衝突時
+        {
+
         }
     }
 
@@ -200,28 +253,76 @@ public class PlayerController : MonoBehaviour
 
     void RotatePlayer()
     {
-        if (gamepadState.LeftShoulder )
+        if (gamepadState.LeftShoulder)
         {
-            //rigid.AddTorque(torquePower * Time.fixedDeltaTime, ForceMode2D.Impulse);
-            this.transform.Rotate(Vector3.forward, torquePower * Time.fixedDeltaTime);
+            //rigid.AddTorque(torquePower * Time.deltaTime, ForceMode2D.Impulse);
+            this.transform.Rotate(Vector3.forward, torquePower * Time.deltaTime);
 
         }
         if (gamepadState.RightShoulder)
         {
-            //rigid.AddTorque(-torquePower * Time.fixedDeltaTime, ForceMode2D.Impulse);
-            this.transform.Rotate(Vector3.forward, -torquePower * Time.fixedDeltaTime);
+            //rigid.AddTorque(-torquePower * Time.deltaTime, ForceMode2D.Impulse);
+            this.transform.Rotate(Vector3.forward, -torquePower * Time.deltaTime);
         }
 
     }
 
     void Downed()
     {
+        downtimer += Time.deltaTime;
 
+        if (downtimer >= downTime)
+        {
+            isDown = false;
+            isInvincible = true;
+            downtimer = 0.0f;
+            moveUpdater = Invincible;
+            return;
+        }
+        {
+            //二倍の減衰でブレーキ
+            Vector2 dump = rigid.velocity * brakeDump * 2.0f;
+            rigid.velocity -= dump * Time.deltaTime;
+            if (rigid.velocity.SqrMagnitude()<=0.001f)
+            {
+                rigid.velocity = Vector2.zero;
+            }
+
+            Vector2 tempVelo = Vector2.zero;
+            if (gamepadState.Left)
+            {
+                tempVelo += Vector2.left;
+            }
+            if (gamepadState.Up)
+            {
+                tempVelo += Vector2.up;
+            }
+            if (gamepadState.Right)
+            {
+                tempVelo += Vector2.right;
+            }
+            if (gamepadState.Down)
+            {
+                tempVelo += Vector2.down;
+            }
+            tempVelo.Normalize();
+            tempVelo *= hoverMovePower * Time.deltaTime;
+            tempVelo.x = Mathf.Clamp(tempVelo.x, hoverClamp.x, hoverClamp.y);
+            tempVelo.y = Mathf.Clamp(tempVelo.y, hoverClamp.x, hoverClamp.y);
+
+            rigid.AddRelativeForce((tempVelo * movePower), ForceMode2D.Force);
+        }
     }
 
-    void Massive()
+    void Invincible()
     {
-
+        invincibleTimer += Time.deltaTime;
+        if (invincibleTimer >= invincibleTime)
+        {
+            isInvincible = false;
+            invincibleTimer = 0.0f;
+            moveUpdater = Normal;
+        }
     }
 
     void GamePadStateUpdate()
@@ -231,5 +332,6 @@ public class PlayerController : MonoBehaviour
         gamepadState = GamepadInput.GamePad.GetState(playerNo);
 
     }
+
 
 }
