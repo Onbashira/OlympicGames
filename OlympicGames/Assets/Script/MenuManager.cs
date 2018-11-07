@@ -15,27 +15,25 @@ public class MenuManager : MonoBehaviour
 				//3,4は、ギミックの変更の場所へ
 
 				//カーソルが現在どのUIを選択しているのか
-				private MenuUI[] player_carsor_ui = new MenuUI[ModeSetting.k_player_num_max];
+				private MenuUI[] player_carsor_ui = new MenuUI[4];
 
 				//メニュ―で設定する機能
 				private StockSetting stock_set;//ストックの設定を行う
 				private GimickSetting gimick_set; //ギミックを使用するかどうか
 
 				//入力を判断するための差分
-				private GamepadInput.GamepadState gamepad_state;
-				private GamepadInput.GamepadState gamepad_state_old;
+				private GamepadInput.GamepadState[] gamepad_state = new GamepadInput.GamepadState[4];
+				private GamepadInput.GamepadState[] gamepad_state_old = new GamepadInput.GamepadState[4];
 				
 				//ルールの決定が終わりました
 				public bool is_menu_end;
 
 				System.Action input_updater;
 				System.Action player_updater;
-
 				
 				//初期化
-				private void Initialized()
+				public void Initialized()
 				{
-								Instantiate(Resources.Load("Prefab/Star"));
 								input_updater = GamepadStateUpdate;
 								player_updater = PlayerUpdate;
 								is_menu_end = false;
@@ -45,17 +43,22 @@ public class MenuManager : MonoBehaviour
 				{
 								stock_set = transform.Find("Stock").GetComponent<StockSetting>();
 								gimick_set = transform.Find("Gimick").GetComponent<GimickSetting>();
-								
+
+								Initialized();
+								for (int i = 0; i < ModeSetting.k_player_num_max; i++)
+								{
+												gamepad_state[i] = gamepad_state_old[i] = GamePad.GetState((GamePad.Index)0);
+								}
 								//初期化
 								for (int i = 0; i < ModeSetting.k_player_num_max; i++)
 								{
 												player_carsor_ui[i] = MenuUI.PLAYER;
 								}
-								Initialized();
 				}
 
 				void Update()
 				{
+								ModeSetting.ChackPlayerConnected();
 								if(!is_menu_end)
 								{
 												//セレクトの処理がまだ終わっていません
@@ -73,7 +76,7 @@ public class MenuManager : MonoBehaviour
 				//プレイヤーの行動
 				private void PlayerUpdate()
 				{
-								for (int i = 0; i < ModeSetting.k_player_num_max; i++)
+								for (int i = 0; i < ModeSetting.player_data.Count; i++)
 								{
 												if (!ModeSetting.player_data[i].is_connected)
 												{
@@ -112,26 +115,26 @@ public class MenuManager : MonoBehaviour
 				//ストックUI上での処理
 				private void StockUiBehavior(int player_num)
 				{
-								if (gamepad_state.Right && !gamepad_state_old.Right)
+								if (gamepad_state[player_num].Right && !gamepad_state_old[player_num].Right)
 								{
 												//ストックからギミックの選択場所へ移動
 												player_carsor_ui[player_num] = MenuUI.GIMICK;
 												//ここでカーソルの移動処理を
 												return;
 								}
-								else if (gamepad_state.Down && !gamepad_state_old.Down)
+								else if (gamepad_state[player_num].Down && !gamepad_state_old[player_num].Down)
 								{
 												//ストックからプレイヤーの色選択へ移動
 												player_carsor_ui[player_num] = MenuUI.PLAYER;
 												//ここでカーソルの移動処理を
 												return;
 								}
-								else if (gamepad_state.LeftShoulder && !gamepad_state_old.LeftShoulder)
+								else if (gamepad_state[player_num].LeftShoulder && !gamepad_state_old[player_num].LeftShoulder)
 								{
 												//ストックの減算
 												ModeSetting.ChangeRemaining(-1);
 								}
-								else if (gamepad_state.RightShoulder && !gamepad_state_old.RightShoulder)
+								else if (gamepad_state[player_num].RightShoulder && !gamepad_state_old[player_num].RightShoulder)
 								{
 												//ストックの加算
 												ModeSetting.ChangeRemaining(1);
@@ -141,14 +144,14 @@ public class MenuManager : MonoBehaviour
 				//ギミックUI上での処理
 				private void GimickUiBehavior(int player_num)
 				{
-								if (gamepad_state.Left && !gamepad_state_old.Left)
+								if (gamepad_state[player_num].Left && !gamepad_state_old[player_num].Left)
 								{
 												//ストックからギミックの選択場所へ移動
 												player_carsor_ui[player_num] = MenuUI.GIMICK;
 												//ここでカーソルの移動処理を
 												return;
 								}
-								else if (gamepad_state.Down && !gamepad_state_old.Down)
+								else if (gamepad_state[player_num].Down && !gamepad_state_old[player_num].Down)
 								{
 												//ストックからプレイヤーの色選択へ移動
 												player_carsor_ui[player_num] = MenuUI.PLAYER;
@@ -158,12 +161,12 @@ public class MenuManager : MonoBehaviour
 
 								//ここどうしましょうか、入力
 
-								else if (gamepad_state.LeftShoulder && !gamepad_state_old.LeftShoulder)
+								else if (gamepad_state[player_num].LeftShoulder && !gamepad_state_old[player_num].LeftShoulder)
 								{
 												//ストックの減算
 												ModeSetting.ChangeIsGimick();
 								}
-								else if (gamepad_state.RightShoulder && !gamepad_state_old.RightShoulder)
+								else if (gamepad_state[player_num].RightShoulder && !gamepad_state_old[player_num].RightShoulder)
 								{
 												//ストックの加算
 												ModeSetting.ChangeIsGimick();
@@ -172,7 +175,7 @@ public class MenuManager : MonoBehaviour
 
 				private void PlayerUiBehavior(int player_num)
 				{
-								if (gamepad_state.Up && !gamepad_state_old.Up)
+								if (gamepad_state[player_num].Up && !gamepad_state_old[player_num].Up)
 								{
 												if(player_num < 2)
 												{
@@ -186,7 +189,7 @@ public class MenuManager : MonoBehaviour
 												}
 												//ここでカーソルの移動処理を
 								}
-								else if (gamepad_state.Down && !gamepad_state_old.Down)
+								else if (gamepad_state[player_num].Down && !gamepad_state_old[player_num].Down)
 								{
 												//ストックからプレイヤーの色選択へ移動
 												player_carsor_ui[player_num] = MenuUI.SETEND;
@@ -194,11 +197,11 @@ public class MenuManager : MonoBehaviour
 								}
 								
 								//LRでのカラー変換
-								else if (gamepad_state.LeftShoulder && !gamepad_state_old.LeftShoulder)
+								else if (gamepad_state[player_num].LeftShoulder && !gamepad_state_old[player_num].LeftShoulder)
 								{
 												ModeSetting.ChangePlayerColor(player_num,-1);
 								}
-								else if (gamepad_state.RightShoulder && !gamepad_state_old.RightShoulder)
+								else if (gamepad_state[player_num].RightShoulder && !gamepad_state_old[player_num].RightShoulder)
 								{
 												ModeSetting.ChangePlayerColor(player_num, 1);
 								}
@@ -208,12 +211,12 @@ public class MenuManager : MonoBehaviour
 				//セレクト終了UI上での処理
 				private void SetEndUiBehavior(int player_num)
 				{
-								if (gamepad_state.Up && !gamepad_state_old.Up)
+								if (gamepad_state[player_num].Up && !gamepad_state_old[player_num].Up)
 								{
 												player_carsor_ui[player_num] = MenuUI.PLAYER;
 								}
 
-								if (gamepad_state.A && !gamepad_state_old.A)
+								if (gamepad_state[player_num].A && !gamepad_state_old[player_num].A)
 								{
 												is_menu_end = true;
 								}
@@ -223,10 +226,13 @@ public class MenuManager : MonoBehaviour
 				//比べるデータの作成
 				void GamepadStateUpdate()
 				{
-								for(int i= 0;i < ModeSetting.k_player_num_max;i++)
+								//使われているコントローラーの情報のみ更新
+								for(int i= 0;i < ModeSetting.player_data.Count;i++)
 								{
 												gamepad_state_old = gamepad_state;
-												gamepad_state = GamePad.GetState((GamePad.Index)i);
+												//リストに格納されているもの順に調べる
+												gamepad_state[ModeSetting.player_data[i].player_number] =
+																GamePad.GetState((GamePad.Index)ModeSetting.player_data[i].player_number);
 								}
 				}
 }

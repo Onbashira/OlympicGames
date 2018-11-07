@@ -6,29 +6,31 @@ using GamepadInput;
 
 public static class ControllerFetcher
 {
-
     [SerializeField]
     private static int maxConnectedNum = 0; //現在つながれているコントローラ数
 
     private const int MAX_SUPPORTED_NUM = 4; //デフォルトで4つ
 
-				private static bool[] isConnected;
+				private static bool[] isConnected = new bool[4] { false,false,false,false };
 
     // Use this for initialization
     public static void Initialize()
     {
         var controllerNames = Input.GetJoystickNames();
         int controllerNum = 0;
+
         //既に接続されているものから名前があるもの（現在接続されているもの）の数を抽出
-        for (int i = 0; i < MAX_SUPPORTED_NUM; ++i)
+								//0は全部の入力のため排除
+        for (int i = 0; i < controllerNames.Length; i++)
         {
-            if (controllerNames[i] != "")
-            {
-                ++controllerNum;
+												if (controllerNames[i] != "")
+												{
+																++controllerNum;
+																
 																isConnected[i] = true;
 																continue;
-            }
-            Debug.Log("ControllerIndex " + i + "is Missing");
+												}
+												//Debug.Log("ControllerIndex " + i + "is Missing");
 												isConnected[i] = false;
 								}
         maxConnectedNum = controllerNum;
