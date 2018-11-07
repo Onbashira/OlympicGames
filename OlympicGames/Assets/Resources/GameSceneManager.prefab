@@ -51,6 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4b1b32b5cb79ea46aceb366cbffa776, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxFadeUpdateTime: 1
   maxPreUpdateTime: 1
   maxStartGameTime: 1
   maxGameSetTime: 1
@@ -61,11 +62,13 @@ MonoBehaviour:
   isGameSetPassed: 0
   isGameEndPassed: 0
   characterTextures:
-  - {fileID: 21300000, guid: 6910956170a3bd4408e4ede400375cc5, type: 3}
   - {fileID: 21300000, guid: da712b4b3335db144a82710dec916d65, type: 3}
-  - {fileID: 21300000, guid: d17b29a1e2ebccd41a1ec0ef8ccf8a33, type: 3}
-  - {fileID: 21300000, guid: 1029c48394238904197101a0dc476c55, type: 3}
   - {fileID: 21300000, guid: 35133d09e43a2d243a7677f1294ba5bc, type: 3}
   - {fileID: 21300000, guid: 4b273671fddff4044860d6d678b60b7a, type: 3}
   - {fileID: 21300000, guid: a93e499423568e546b27e91d5bb572c3, type: 3}
+  - {fileID: 21300000, guid: 6910956170a3bd4408e4ede400375cc5, type: 3}
+  - {fileID: 21300000, guid: 1029c48394238904197101a0dc476c55, type: 3}
   - {fileID: 21300000, guid: 02d411491e0a0dc43968c4ebdbca67a6, type: 3}
+  - {fileID: 21300000, guid: d17b29a1e2ebccd41a1ec0ef8ccf8a33, type: 3}
+  fade: {fileID: 0}
+  shaker: {fileID: 0}

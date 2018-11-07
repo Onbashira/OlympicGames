@@ -39,6 +39,8 @@ public class PlayerController : MonoBehaviour
     bool isDown = false;
     [SerializeField]
     bool isInvincible = false;
+    [SerializeField]
+    bool isCollided = false;
 
     [SerializeField]
     Vector2 respownPos;
@@ -50,6 +52,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     float invincibleTime = 3.0f;
     float invincibleTimer = 0.0f;
+    [SerializeField]
+    float blinkDownTime = 0.1f;
+    [SerializeField]
+    float blinkInvincibleTime = 0.4f;
+    float blinkTimer = 0.0f;
     [SerializeField]
     private GamepadInput.GamepadState gamepadState;
     [SerializeField]
@@ -67,9 +74,12 @@ public class PlayerController : MonoBehaviour
 
     public void Initialized()
     {
+        isCollided = false;
         moveUpdater = Normal;
+        moveVelocity = Vector2.zero;
+        angulerVelocity = 0.0f;
         inputUpdater = GamePadStateUpdate;
-        playerNo = (GamepadInput.GamePad.Index)0; //test
+        //playerNo = (GamepadInput.GamePad.Index)0; //test
         chargeTime = 0.0f;
         gamepadStateOld = gamepadState = GamepadInput.GamePad.GetState(playerNo);
         angulerVelocity = 0.0f;
@@ -103,6 +113,16 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    public bool IsColl()
+    {
+        return isCollided;
+    }
+
+    public void CollReset()
+    {
+        isCollided = false;
+    }
+
     public bool IsInvincible()
     {
         return isInvincible;
@@ -128,7 +148,7 @@ public class PlayerController : MonoBehaviour
         playerNo = (GamepadInput.GamePad.Index)index;
     }
 
-    public void SetRespownParamater(Vector2 pos , float rotate)
+    public void SetRespownParamater(Vector2 pos, float rotate)
     {
 
         this.respownPos = pos;
@@ -166,16 +186,17 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 rvelo = rigid.velocity;
 
-        if (!(rigid.velocity.SqrMagnitude().Equals(0.0f)) && gamepadState.B)
+        if (!(rigid.velocity.SqrMagnitude().Equals(0.0f)))
         {
             Vector2 dump = rvelo * brakeDump;
-            rigid.velocity -= dump * Time.deltaTime;
-            if (rigid.velocity.SqrMagnitude() <= 0.001f)
-            {
-                rigid.velocity = Vector2.zero;
-            }
+            rvelo -= dump * Time.deltaTime;
+            rigid.velocity = rvelo;
         }
-        else if (!gamepadState.B)
+        if (rvelo.SqrMagnitude() < 0.00001f)
+        {
+            rigid.velocity = Vector2.zero;
+        }
+        if (!gamepadState.B)
         {
             moveUpdater = Normal;
             return;
@@ -201,12 +222,39 @@ public class PlayerController : MonoBehaviour
         }
 
         tempVelo.Normalize();
-        tempVelo *= hoverMovePower * Time.deltaTime;
+        tempVelo = tempVelo * hoverMovePower * Time.deltaTime;
         tempVelo.x = Mathf.Clamp(tempVelo.x, hoverClamp.x, hoverClamp.y);
         tempVelo.y = Mathf.Clamp(tempVelo.y, hoverClamp.x, hoverClamp.y);
 
-        rigid.AddRelativeForce((tempVelo * movePower), ForceMode2D.Force);
+        rigid.AddRelativeForce((tempVelo), ForceMode2D.Force);
 
+    }
+
+    void Boost()
+    {
+        chargeTime -= Time.deltaTime;
+        if (chargeTime <= 0.0f)
+        {
+            moveUpdater = Normal;
+            return;
+        }
+        Vector2 rvelo = rigid.velocity;
+
+        Vector2 tempVelo = (Vector2.up * (float)chargeTime * movePower);
+        rigid.AddRelativeForce(tempVelo, ForceMode2D.Force);
+
+        if (!(rigid.velocity.SqrMagnitude().Equals(0.0f)))
+        {
+            Vector2 dump = rigid.velocity * brakeDump;
+            rvelo -= dump * Time.deltaTime;
+            rigid.velocity = rvelo;
+        }
+        if (rvelo.SqrMagnitude() < 0.00001f)
+        {
+            rigid.velocity = Vector2.zero;
+            moveUpdater = Normal;
+            return;
+        }
     }
 
     void Charge()
@@ -220,17 +268,15 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-
         if (!gamepadState.A)
         {
-            Vector2 tempVelo = (Vector2.up * (float)chargeTime * movePower);
+
+            Vector2 tempVelo = (Vector2.up * (float)1.0 * movePower);
             if (chargeTime >= maxChargeTime)
             {
                 rigid.velocity = Vector2.zero;
             }
-
             rigid.AddRelativeForce(tempVelo, ForceMode2D.Impulse);
-
             chargeTime = 0.0f;
             moveUpdater = Normal;
             return;
@@ -245,10 +291,12 @@ public class PlayerController : MonoBehaviour
             PlayerController player = collision.gameObject.GetComponent<PlayerController>();
             if (player.moveVelocity.SqrMagnitude() >= moveVelocity.SqrMagnitude())
             {
-                isDown = true;
-                moveUpdater = Downed;
+                //isDown = true;
+                //isCollided = true;
+                //moveUpdater = Downed;
                 chargeTime = 0.0f;
-
+                rigid.velocity += player.rigid.velocity / 2.0f;
+                player.rigid.velocity /= 2.0f;
             }
 
         }
@@ -259,7 +307,6 @@ public class PlayerController : MonoBehaviour
         }
         else if (collision.gameObject.tag == "Wall") //壁との衝突時
         {
-
         }
     }
 
@@ -275,7 +322,7 @@ public class PlayerController : MonoBehaviour
             moveUpdater = Charge;
             return;
         }
-        else if (gamepadState.B)
+        else if (gamepadState.B && !gamepadStateOld.B)
         {
             moveUpdater = Brake;
             return;
@@ -301,18 +348,27 @@ public class PlayerController : MonoBehaviour
     void Downed()
     {
         downtimer += Time.deltaTime;
-
+        blinkTimer += downTime;
+        if (blinkTimer >= blinkDownTime)
+        {
+            blinkTimer = 0.0f;
+            bool flg = spriteRenderer.enabled;
+            spriteRenderer.enabled = !flg;
+        }
         if (downtimer >= downTime)
         {
             isDown = false;
             isInvincible = true;
+            spriteRenderer.enabled = true;
+            blinkTimer = 0.0f;
+
             downtimer = 0.0f;
             moveUpdater = Invincible;
             return;
         }
         {
             //二倍の減衰でブレーキ
-            Vector2 dump = rigid.velocity * brakeDump * 2.0f;
+            Vector2 dump = rigid.velocity * brakeDump ;
             rigid.velocity -= dump * Time.deltaTime;
             if (rigid.velocity.SqrMagnitude() <= 0.001f)
             {
@@ -348,8 +404,17 @@ public class PlayerController : MonoBehaviour
     void Invincible()
     {
         invincibleTimer += Time.deltaTime;
+        blinkTimer += invincibleTimer;
+        if (blinkTimer >= blinkInvincibleTime)
+        {
+            blinkTimer = 0.0f;
+            bool flg = spriteRenderer.enabled;
+            spriteRenderer.enabled = !flg;
+        }
         if (invincibleTimer >= invincibleTime)
         {
+            spriteRenderer.enabled = true;
+            blinkTimer = 0.0f;
             isInvincible = false;
             invincibleTimer = 0.0f;
             moveUpdater = Normal;
