@@ -47,7 +47,7 @@ public class Fade : MonoBehaviour
             fader.Range = cutoutRange;
             yield return endFrame;
         }
-        cutoutRange = 0.0f;
+        cutoutRange = 1.0f;
         fadeOutIsCompleted = true;
         fader.Range = cutoutRange;
 
@@ -70,7 +70,7 @@ public class Fade : MonoBehaviour
             fader.Range = cutoutRange;
             yield return endFrame;
         }
-        cutoutRange = 1.0f;
+        cutoutRange = 0.0f;
         fadeInIsCompleted = true;
         fader.Range = cutoutRange;
 
