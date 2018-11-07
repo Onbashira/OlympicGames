@@ -81,11 +81,11 @@ public class GameSceneManager : MonoBehaviour
         //接続されているコントローラーからプレイヤーを生成する
         //Lutが必要
         //Test
-        if (ModeSeting.player_data != null)
+        if (ModeSetting.player_data != null)
         {
-            ModeSeting.player_data[0] = new ModeSeting.PlayerData();
+            ModeSetting.player_data[0] = new ModeSetting.PlayerData();
         }
-        foreach (var pl in ModeSeting.player_data)
+        foreach (var pl in ModeSetting.player_data)
         {
             GameObject obj = (GameObject)Resources.Load("Player");
             GameObject playerObj = Instantiate(obj, respawnParamaters[pl.player_number].pos, Quaternion.AngleAxis(respawnParamaters[pl.player_number].rotation, Vector3.forward));
