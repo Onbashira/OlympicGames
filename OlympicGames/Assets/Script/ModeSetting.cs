@@ -20,13 +20,20 @@ public class ModeSetting : MonoBehaviour
 				public struct PlayerData
 				{
 								public int handicap;//プレイヤーのハンデキャップ
-								public int color;//プレイヤーの色//同色禁止！！
+								public ColorIndex color;//プレイヤーの色//同色禁止！！
 								public int player_number;//プレイヤーの番号
 								public bool is_connected;//コントローラーと繋がっているか
 				}
 				private static int player_num;//プレイヤーの数
+
+				//ここ後でリスト格納すること
+				//でないと無駄な入力が多くなってしまう気がする
+				
 				public static PlayerData[] player_data = new PlayerData[4];//プレイヤー別の情報//後でListに
 				public const int k_player_num_max = 4;//プレイヤーの最大数
+
+				//プレイヤーのカラーの順番
+				public enum ColorIndex {GREEN, ORANGE,PINK,PURPLE,RED,BLUE,WHITE,YELLOW};
 				private const int k_color_num_max = 7;//キャラのカラー最大値
 				private const int k_color_num_min = 0;								//カラー最小値
 
@@ -38,7 +45,7 @@ public class ModeSetting : MonoBehaviour
 								for(int i = 0;i < k_player_num_max; i++)
 								{
 												player_data[i].handicap = 0;
-												player_data[i].color = 0;
+												player_data[i].color = (ColorIndex)i;
 												player_data[i].player_number = i + 1;
 								}
 				}
@@ -74,13 +81,13 @@ public class ModeSetting : MonoBehaviour
 								player_data[player_num].color += num;
 
 								//範囲外に行っていないか
-								if (player_data[player_num].color > k_color_num_max)
+								if ((int)player_data[player_num].color > k_color_num_max)
 								{
-												player_data[player_num].color = k_color_num_min;
+												player_data[player_num].color = (ColorIndex)k_color_num_min;
 								}
-								else if (player_data[player_num].color > k_color_num_min)
+								else if ((int)player_data[player_num].color > k_color_num_min)
 								{
-												player_data[player_num].color = k_color_num_max;
+												player_data[player_num].color = (ColorIndex)k_color_num_max;
 								}
 								
 								bool is_same = false;
