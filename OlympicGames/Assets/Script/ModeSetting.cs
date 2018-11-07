@@ -100,14 +100,13 @@ public class ModeSetting : MonoBehaviour
 								{
 												pd.color = (ColorIndex)k_color_num_min;
 								}
-								else if ((int)pd.color > k_color_num_min)
+								else if ((int)pd.color < k_color_num_min)
 								{
 												pd.color = (ColorIndex)k_color_num_max;
 								}
-
 								bool is_same = false;
 								//誰かと同じ色ではないかどうか調べる
-								for (int i = 0; i < k_player_num_max; i++)
+								for (int i = 0; i < player_data.Count; i++)
 								{
 												if (i == player_num)
 												{
@@ -176,6 +175,7 @@ public class ModeSetting : MonoBehaviour
 																Debug.Log("コントローラー" + i + "がプレイヤー"+ (player_data.Count + 1) + "Pとして参加しました");
 																pd.player_number = i;//プレイヤーとコントローラーの関連付け
 																player_data.Add(pd);//新しいコントローラー追加
+																ChangePlayerColor(player_data.Count - 1, 1);
 																is_connect[i] = true;
 																continue;
 												}

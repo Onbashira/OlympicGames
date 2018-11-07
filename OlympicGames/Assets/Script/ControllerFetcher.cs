@@ -23,6 +23,11 @@ public static class ControllerFetcher
 								//0は全部の入力のため排除
         for (int i = 0; i < controllerNames.Length; i++)
         {
+												if(i >= MAX_SUPPORTED_NUM)
+												{
+																Debug.Log("ControllerIndex " + i + "is Missing");
+																break;
+												}
 												if (controllerNames[i] != "")
 												{
 																++controllerNum;
@@ -30,7 +35,7 @@ public static class ControllerFetcher
 																isConnected[i] = true;
 																continue;
 												}
-												//Debug.Log("ControllerIndex " + i + "is Missing");
+												Debug.Log("ControllerIndex " + i + "is Missing");
 												isConnected[i] = false;
 								}
         maxConnectedNum = controllerNum;

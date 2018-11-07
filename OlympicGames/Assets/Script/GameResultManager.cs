@@ -4,7 +4,6 @@ using UnityEngine;
 
 public static class GameResultManager
 {
-
     //Rank順に格納されたリスト
     [SerializeField]
     private static List<int> playerRankList;
