@@ -35,7 +35,6 @@ public class GameSceneManager : MonoBehaviour
     void Start()
     {
 
-
     }
 
     // Update is called once per frame
@@ -53,6 +52,8 @@ public class GameSceneManager : MonoBehaviour
         isGameSetPassed = false; //一秒
         isGameEndPassed = false; //一秒
         //接続されているコントローラーからプレイヤーを生成する
+
+
     }
 
 
