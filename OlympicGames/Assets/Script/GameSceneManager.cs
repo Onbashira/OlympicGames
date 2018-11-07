@@ -41,10 +41,10 @@ public class GameSceneManager : MonoBehaviour
     [SerializeField]
     RespawnParamater[] respawnParamaters = {
         new RespawnParamater(new Vector2(    0.0f,  00f),-0.0f),
-        new RespawnParamater(new Vector2(  -10.0f,  10.0f),-135.0f),
-        new RespawnParamater(new Vector2(   10.0f,  10.0f), 135.0f),
-        new RespawnParamater(new Vector2(   0.0f,  -10.0f),-45.0f),
-        new RespawnParamater(new Vector2(   0.0f,  -10.0f), 45.0f)
+        new RespawnParamater(new Vector2(  -1.0f,  0.5f),-135.0f),
+        new RespawnParamater(new Vector2(   1.0f,  0.5f), 135.0f),
+        new RespawnParamater(new Vector2(  -1.0f,  -0.5f),-45.0f),
+        new RespawnParamater(new Vector2(   1.0f,  -0.5f), 45.0f)
     };
 
     [SerializeField]
@@ -52,11 +52,13 @@ public class GameSceneManager : MonoBehaviour
 
 
     System.Action gameUpdater;
-    Camera mainCamera;
-    List<PlayerController> players;
+    List<GameObject> players = new List<GameObject>();
     CanvasGroup UIcanvas;
     [SerializeField]
     private Fade fade = null;
+    [SerializeField]
+    CameraShaker shaker = null;
+
 
     // Use this for initialization
     void Start()
@@ -82,26 +84,29 @@ public class GameSceneManager : MonoBehaviour
         //接続されているコントローラーからプレイヤーを生成する
         //Lutが必要
         //Test
-        if (ModeSetting.player_data != null)
+
+        for (int i = 0; i < ModeSetting.player_data.Length; i++)
         {
-            ModeSetting.player_data[0] = new ModeSetting.PlayerData();
+            ModeSetting.player_data[i].color = (ModeSetting.ColorIndex)i;
+            ModeSetting.player_data[i].handicap = 2;
+            ModeSetting.player_data[i].is_connected = false;
+            ModeSetting.player_data[i].player_number = (int)(i + 1);
         }
+
         foreach (var pl in ModeSetting.player_data)
         {
-            GameObject obj = (GameObject)Resources.Load("Player");
-            GameObject playerObj = Instantiate(obj, respawnParamaters[pl.player_number].pos, Quaternion.AngleAxis(respawnParamaters[pl.player_number].rotation, Vector3.forward));
-            PlayerController player = playerObj.GetComponent<PlayerController>();
-            SpriteRenderer spriteRendere = playerObj.GetComponent<SpriteRenderer>();
+            players.Add(Instantiate((GameObject)Resources.Load("Player"), respawnParamaters[pl.player_number].pos, Quaternion.AngleAxis(respawnParamaters[pl.player_number].rotation, Vector3.forward)));
 
-            player.Initialized();
-            player.SetPlayerNO(1);
-            player.SetRespownParamater(respawnParamaters[pl.player_number].pos, respawnParamaters[pl.player_number].rotation);
-            player.SetUpdaterToWait();
-            spriteRendere.sprite = this.characterTextures[(int)pl.color];
-
+            players[players.Count - 1].GetComponent<PlayerController>().Initialized();
+            players[players.Count - 1].GetComponent<PlayerController>().SetPlayerNO(pl.player_number);
+            players[players.Count - 1].GetComponent<PlayerController>().SetRespownParamater(respawnParamaters[pl.player_number].pos, respawnParamaters[pl.player_number].rotation);
+            players[players.Count - 1].GetComponent<PlayerController>().SetUpdaterToWait();
+            players[players.Count - 1].GetComponent<SpriteRenderer>().sprite = this.characterTextures[(int)pl.color];
+            //players.Add(playerObj);
         }
         gameUpdater = GameUpdateFadeIn;
-        fade.FadeIn(maxFadeUpdateTime, () => {
+        fade.FadeIn(maxFadeUpdateTime, () =>
+        {
             gameUpdater = GameUpdatePreUpdate;
 
         });
@@ -139,7 +144,16 @@ public class GameSceneManager : MonoBehaviour
     //ゲームの通常アップデート　もしもこのアップデート中にプレイヤーの残機がゼロになるなどでゲームセットフェーズに移行
     void GameUpdateNormal()
     {
-
+        foreach (var player in players)
+        {
+            var p = player.GetComponent<PlayerController>();
+            if (p.IsColl())
+            {
+                shaker.Shake(0.2f, 0.1f);
+                p.CollReset();
+                break;
+            }
+        }
     }
 
     //ゲームの終了を告げるカットイン
@@ -166,7 +180,8 @@ public class GameSceneManager : MonoBehaviour
 
             gameUpdater = GameUpdateNormal;
 
-            fade.FadeOut(maxFadeUpdateTime, () => {
+            fade.FadeOut(maxFadeUpdateTime, () =>
+            {
                 gameUpdater = GameUpdateFadeOut;
 
             });

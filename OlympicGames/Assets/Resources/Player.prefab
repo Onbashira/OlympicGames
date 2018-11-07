@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 212550029642299932}
   - component: {fileID: 50331970203254740}
   - component: {fileID: 114518134666962686}
-  - component: {fileID: 58944793613733844}
+  - component: {fileID: 58941779249927762}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -37,7 +37,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1430210945632414}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.824, y: 0, z: 0}
   m_LocalScale: {x: 0.00005, y: 0.00005, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -59,11 +59,11 @@ Rigidbody2D:
   m_AngularDrag: 0.1
   m_GravityScale: 0
   m_Material: {fileID: 6200000, guid: 7e4621d9c9c158a49ae6377d88017096, type: 2}
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
---- !u!58 &58944793613733844
+--- !u!58 &58941779249927762
 CircleCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -75,9 +75,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 34.35, y: 0}
   serializedVersion: 2
-  m_Radius: 0.08
+  m_Radius: 955
 --- !u!114 &114518134666962686
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -89,11 +89,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fedbd180491c46c43a86375b48ee183a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movePower: 0.7
+  movePower: 1
   moveVelocity: {x: 0, y: 0}
-  velocityClamp: {x: -30, y: 30}
-  hoverMovePower: 5
-  hoverClamp: {x: -5, y: 5}
+  velocityClamp: {x: -15, y: 15}
+  hoverMovePower: 10
+  hoverClamp: {x: -10, y: 10}
   angulerVelocity: 0
   torquePower: 30
   torqueClamp: {x: -30, y: 30}
@@ -104,10 +104,13 @@ MonoBehaviour:
   isDead: 0
   isDown: 0
   isInvincible: 0
+  isCollided: 0
   respownPos: {x: 0, y: 0}
   respownRotate: 0
-  downTime: 3
-  invincibleTime: 3
+  downTime: 0.5
+  invincibleTime: 1.5
+  blinkDownTime: 0.2
+  blinkInvincibleTime: 0.4
   chargeTime: 0
 --- !u!212 &212550029642299932
 SpriteRenderer:
