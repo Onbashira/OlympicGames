@@ -1,42 +1,45 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Sprites;
+
 
 public class PlayerController : MonoBehaviour
 {
 
-    [SerializeField]
     Rigidbody2D rigid;
     [SerializeField]
     float movePower = 1.0f;
+    [SerializeField]
+    private Vector2 moveVelocity = Vector2.zero;
+    [SerializeField]
+    private Vector2 velocityClamp;
     [SerializeField]
     float hoverMovePower = 1.0f;
     [SerializeField]
     Vector2 hoverClamp;
     [SerializeField]
+    private float angulerVelocity = 0.0f;
+    [SerializeField]
     float torquePower = 1.0f;
     [SerializeField]
-    float maxChargeTime = 2.0f;
-    [SerializeField]
     Vector2 torqueClamp;
+    [SerializeField]
+    float maxChargeTime = 2.0f;
     [SerializeField]
     float brakeDump = 0.1f;
     [SerializeField]
     GamepadInput.GamePad.Index playerNo;
     [SerializeField]
     uint playerStock = 0;
+
     [SerializeField]
     bool isDead = false;
     [SerializeField]
     bool isDown = false;
     [SerializeField]
     bool isInvincible = false;
-    [SerializeField]
-    System.Action inputUpdater;
-    [SerializeField]
-    System.Action moveUpdater;
-    [SerializeField]
-    System.Action stateUpdater;
+
     [SerializeField]
     Vector2 respownPos;
     [SerializeField]
@@ -51,20 +54,22 @@ public class PlayerController : MonoBehaviour
     private GamepadInput.GamepadState gamepadState;
     [SerializeField]
     private GamepadInput.GamepadState gamepadStateOld;
-    [SerializeField]
-    private Vector2 moveVelocity = Vector2.zero;
-    [SerializeField]
-    private Vector2 velocityClamp;
-    [SerializeField]
-    private float angulerVelocity = 0.0f;
+
+
     [SerializeField]
     private float chargeTime = 0.0f;
 
-    private void Initialized()
+    SpriteRenderer spriteRenderer = null;
+
+    System.Action inputUpdater;
+    System.Action moveUpdater;
+    System.Action stateUpdater;
+
+    public void Initialized()
     {
         moveUpdater = Normal;
         inputUpdater = GamePadStateUpdate;
-        playerNo = (GamepadInput.GamePad.Index)1; //test
+        playerNo = (GamepadInput.GamePad.Index)0; //test
         chargeTime = 0.0f;
         gamepadStateOld = gamepadState = GamepadInput.GamePad.GetState(playerNo);
         angulerVelocity = 0.0f;
@@ -73,6 +78,7 @@ public class PlayerController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        spriteRenderer = this.gameObject.GetComponent<SpriteRenderer>();
         rigid = this.GetComponent<Rigidbody2D>();
         Initialized();
     }
@@ -116,6 +122,30 @@ public class PlayerController : MonoBehaviour
     {
         isDead = true;
     }
+
+    public void SetPlayerNO(int index)
+    {
+        playerNo = (GamepadInput.GamePad.Index)index;
+    }
+
+    public void SetRespownParamater(Vector2 pos , float rotate)
+    {
+
+        this.respownPos = pos;
+        this.respownRotate = rotate;
+
+    }
+
+    public void SetUpdaterToWait()
+    {
+        moveUpdater = Wait;
+    }
+
+    public void SetUpdaterToNormal()
+    {
+        moveUpdater = Normal;
+    }
+
 
     void ClampVelocity()
     {
@@ -222,9 +252,10 @@ public class PlayerController : MonoBehaviour
             }
 
         }
-        else if (collision.gameObject.tag == "Gimmick") //ギミックとの衝突時
+        else if (collision.gameObject.tag == "BlackHole") //ギミックとの衝突時
         {
-
+            Vector3 hole = collision.transform.position;
+            Vector3 vec = hole - this.transform.position;
         }
         else if (collision.gameObject.tag == "Wall") //壁との衝突時
         {
@@ -239,12 +270,12 @@ public class PlayerController : MonoBehaviour
 
     void Normal()
     {
-        if (gamepadState.A && !gamepadStateOld.A)
+        if (gamepadState.A)
         {
             moveUpdater = Charge;
             return;
         }
-        else if (gamepadState.B && !gamepadStateOld.B)
+        else if (gamepadState.B)
         {
             moveUpdater = Brake;
             return;
@@ -283,7 +314,7 @@ public class PlayerController : MonoBehaviour
             //二倍の減衰でブレーキ
             Vector2 dump = rigid.velocity * brakeDump * 2.0f;
             rigid.velocity -= dump * Time.deltaTime;
-            if (rigid.velocity.SqrMagnitude()<=0.001f)
+            if (rigid.velocity.SqrMagnitude() <= 0.001f)
             {
                 rigid.velocity = Vector2.zero;
             }
