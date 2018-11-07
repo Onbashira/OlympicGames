@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private float chargeTime = 0.0f;
-    
+
     SpriteRenderer spriteRenderer = null;
 
     System.Action inputUpdater;
@@ -97,15 +97,15 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         inputUpdater();
-
-    }
-
-    private void LateUpdate()
-    {
         moveUpdater();
         RotatePlayer();
         ClampVelocity();
         ClapmAngluerVelocity();
+    }
+
+    private void LateUpdate()
+    {
+
     }
 
     private void FixedUpdate()
@@ -230,6 +230,33 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    void Boost()
+    {
+        chargeTime -= Time.deltaTime;
+        if (chargeTime <= 0.0f)
+        {
+            moveUpdater = Normal;
+            return;
+        }
+        Vector2 rvelo = rigid.velocity;
+
+        Vector2 tempVelo = (Vector2.up * (float)chargeTime * movePower);
+        rigid.AddRelativeForce(tempVelo, ForceMode2D.Force);
+
+        if (!(rigid.velocity.SqrMagnitude().Equals(0.0f)))
+        {
+            Vector2 dump = rigid.velocity * brakeDump;
+            rvelo -= dump * Time.deltaTime;
+            rigid.velocity = rvelo;
+        }
+        if (rvelo.SqrMagnitude() < 0.00001f)
+        {
+            rigid.velocity = Vector2.zero;
+            moveUpdater = Normal;
+            return;
+        }
+    }
+
     void Charge()
     {
         if (gamepadState.A)
@@ -243,14 +270,13 @@ public class PlayerController : MonoBehaviour
 
         if (!gamepadState.A)
         {
-            Vector2 tempVelo = (Vector2.up * (float)chargeTime * movePower);
+
+            Vector2 tempVelo = (Vector2.up * (float)1.0 * movePower);
             if (chargeTime >= maxChargeTime)
             {
                 rigid.velocity = Vector2.zero;
             }
-
             rigid.AddRelativeForce(tempVelo, ForceMode2D.Impulse);
-
             chargeTime = 0.0f;
             moveUpdater = Normal;
             return;
@@ -265,11 +291,12 @@ public class PlayerController : MonoBehaviour
             PlayerController player = collision.gameObject.GetComponent<PlayerController>();
             if (player.moveVelocity.SqrMagnitude() >= moveVelocity.SqrMagnitude())
             {
-                isDown = true;
-                isCollided = true;
-                moveUpdater = Downed;
+                //isDown = true;
+                //isCollided = true;
+                //moveUpdater = Downed;
                 chargeTime = 0.0f;
-
+                rigid.velocity += player.rigid.velocity / 2.0f;
+                player.rigid.velocity /= 2.0f;
             }
 
         }
@@ -280,7 +307,6 @@ public class PlayerController : MonoBehaviour
         }
         else if (collision.gameObject.tag == "Wall") //壁との衝突時
         {
-
         }
     }
 
@@ -342,7 +368,7 @@ public class PlayerController : MonoBehaviour
         }
         {
             //二倍の減衰でブレーキ
-            Vector2 dump = rigid.velocity * brakeDump * 2.0f;
+            Vector2 dump = rigid.velocity * brakeDump ;
             rigid.velocity -= dump * Time.deltaTime;
             if (rigid.velocity.SqrMagnitude() <= 0.001f)
             {

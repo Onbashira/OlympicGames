@@ -640,6 +640,16 @@ Prefab:
       propertyPath: m_BodyType
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 50001526571541728, guid: c2a55a9c9db3b9f4ba1be824ae727597,
+        type: 2}
+      propertyPath: m_BodyType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 50655751271697466, guid: c2a55a9c9db3b9f4ba1be824ae727597,
+        type: 2}
+      propertyPath: m_BodyType
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c2a55a9c9db3b9f4ba1be824ae727597, type: 2}
   m_IsPrefabAsset: 0
