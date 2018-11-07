@@ -85,12 +85,13 @@ public class GameSceneManager : MonoBehaviour
         //Lutが必要
         //Test
 
-        for (int i = 0; i < ModeSetting.player_data.Length; i++)
+        for (int i = 0; i < ModeSetting.player_data.Count; i++)
         {
-            ModeSetting.player_data[i].color = (ModeSetting.ColorIndex)i;
-            ModeSetting.player_data[i].handicap = 2;
-            ModeSetting.player_data[i].is_connected = false;
-            ModeSetting.player_data[i].player_number = (int)(i + 1);
+												ModeSetting.PlayerData pd = ModeSetting.player_data[i];
+												pd.color = (ModeSetting.ColorIndex)i;
+												pd.handicap = 2;
+												pd.is_connected = false;
+												pd.player_number = (int)(i + 1);
         }
 
         foreach (var pl in ModeSetting.player_data)
