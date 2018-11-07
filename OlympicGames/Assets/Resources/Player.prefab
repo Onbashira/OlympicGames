@@ -119,13 +119,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fedbd180491c46c43a86375b48ee183a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigid: {fileID: 50331970203254740}
   movePower: 0.7
+  moveVelocity: {x: 0, y: 0}
+  velocityClamp: {x: -30, y: 30}
   hoverMovePower: 5
   hoverClamp: {x: -5, y: 5}
+  angulerVelocity: 0
   torquePower: 30
-  maxChargeTime: 2
   torqueClamp: {x: -30, y: 30}
+  maxChargeTime: 2
   brakeDump: 0.7
   playerNo: 1
   playerStock: 3
@@ -136,10 +138,8 @@ MonoBehaviour:
   respownRotate: 0
   downTime: 3
   invincibleTime: 3
-  moveVelocity: {x: 0, y: 0}
-  velocityClamp: {x: -30, y: 30}
-  angulerVelocity: 0
   chargeTime: 0
+  spriteRenderer: {fileID: 0}
 --- !u!212 &212550029642299932
 SpriteRenderer:
   m_ObjectHideFlags: 1

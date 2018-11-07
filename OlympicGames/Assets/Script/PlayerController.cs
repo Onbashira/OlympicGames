@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Sprites;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -57,15 +59,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float chargeTime = 0.0f;
 
+    SpriteRenderer spriteRenderer = null;
+
     System.Action inputUpdater;
     System.Action moveUpdater;
     System.Action stateUpdater;
 
-    private void Initialized()
+    public void Initialized()
     {
         moveUpdater = Normal;
         inputUpdater = GamePadStateUpdate;
-        playerNo = (GamepadInput.GamePad.Index)1; //test
+        playerNo = (GamepadInput.GamePad.Index)0; //test
         chargeTime = 0.0f;
         gamepadStateOld = gamepadState = GamepadInput.GamePad.GetState(playerNo);
         angulerVelocity = 0.0f;
@@ -74,6 +78,7 @@ public class PlayerController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        spriteRenderer = this.gameObject.GetComponent<SpriteRenderer>();
         rigid = this.GetComponent<Rigidbody2D>();
         Initialized();
     }
@@ -117,6 +122,30 @@ public class PlayerController : MonoBehaviour
     {
         isDead = true;
     }
+
+    public void SetPlayerNO(int index)
+    {
+        playerNo = (GamepadInput.GamePad.Index)index;
+    }
+
+    public void SetRespownParamater(Vector2 pos , float rotate)
+    {
+
+        this.respownPos = pos;
+        this.respownRotate = rotate;
+
+    }
+
+    public void SetUpdaterToWait()
+    {
+        moveUpdater = Wait;
+    }
+
+    public void SetUpdaterToNormal()
+    {
+        moveUpdater = Normal;
+    }
+
 
     void ClampVelocity()
     {
@@ -223,9 +252,10 @@ public class PlayerController : MonoBehaviour
             }
 
         }
-        else if (collision.gameObject.tag == "Gimmick") //ギミックとの衝突時
+        else if (collision.gameObject.tag == "BlackHole") //ギミックとの衝突時
         {
-
+            Vector3 hole = collision.transform.position;
+            Vector3 vec = hole - this.transform.position;
         }
         else if (collision.gameObject.tag == "Wall") //壁との衝突時
         {
