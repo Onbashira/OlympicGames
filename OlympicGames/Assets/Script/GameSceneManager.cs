@@ -96,7 +96,7 @@ public class GameSceneManager : MonoBehaviour
             player.SetPlayerNO(pl.player_number);
             player.SetRespownParamater(respawnParamaters[pl.player_number].pos, respawnParamaters[pl.player_number].rotation);
             player.SetUpdaterToWait();
-            spriteRendere.sprite = this.characterTextures[pl.color];
+            spriteRendere.sprite = this.characterTextures[(int)pl.color];
 
         }
         gameUpdater = GameUpdateFadeIn;
