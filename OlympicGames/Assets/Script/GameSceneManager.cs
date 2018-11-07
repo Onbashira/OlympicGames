@@ -40,6 +40,7 @@ public class GameSceneManager : MonoBehaviour
 
     [SerializeField]
     RespawnParamater[] respawnParamaters = {
+        new RespawnParamater(new Vector2(    0.0f,  00f),-0.0f),
         new RespawnParamater(new Vector2(  -10.0f,  10.0f),-135.0f),
         new RespawnParamater(new Vector2(   10.0f,  10.0f), 135.0f),
         new RespawnParamater(new Vector2(   0.0f,  -10.0f),-45.0f),
@@ -93,7 +94,7 @@ public class GameSceneManager : MonoBehaviour
             SpriteRenderer spriteRendere = playerObj.GetComponent<SpriteRenderer>();
 
             player.Initialized();
-            player.SetPlayerNO(pl.player_number);
+            player.SetPlayerNO(1);
             player.SetRespownParamater(respawnParamaters[pl.player_number].pos, respawnParamaters[pl.player_number].rotation);
             player.SetUpdaterToWait();
             spriteRendere.sprite = this.characterTextures[pl.color];

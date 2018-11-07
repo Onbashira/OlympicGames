@@ -99,7 +99,7 @@ MonoBehaviour:
   torqueClamp: {x: -30, y: 30}
   maxChargeTime: 2
   brakeDump: 0.7
-  playerNo: 1
+  playerNo: 0
   playerStock: 3
   isDead: 0
   isDown: 0
@@ -142,8 +142,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1347999119
-  m_SortingLayer: 4
-  m_SortingOrder: -3
+  m_SortingLayer: -4
+  m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 02d411491e0a0dc43968c4ebdbca67a6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
