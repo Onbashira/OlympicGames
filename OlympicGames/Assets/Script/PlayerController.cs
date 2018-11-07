@@ -5,38 +5,39 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    [SerializeField]
     Rigidbody2D rigid;
     [SerializeField]
     float movePower = 1.0f;
+    [SerializeField]
+    private Vector2 moveVelocity = Vector2.zero;
+    [SerializeField]
+    private Vector2 velocityClamp;
     [SerializeField]
     float hoverMovePower = 1.0f;
     [SerializeField]
     Vector2 hoverClamp;
     [SerializeField]
+    private float angulerVelocity = 0.0f;
+    [SerializeField]
     float torquePower = 1.0f;
     [SerializeField]
-    float maxChargeTime = 2.0f;
-    [SerializeField]
     Vector2 torqueClamp;
+    [SerializeField]
+    float maxChargeTime = 2.0f;
     [SerializeField]
     float brakeDump = 0.1f;
     [SerializeField]
     GamepadInput.GamePad.Index playerNo;
     [SerializeField]
     uint playerStock = 0;
+
     [SerializeField]
     bool isDead = false;
     [SerializeField]
     bool isDown = false;
     [SerializeField]
     bool isInvincible = false;
-    [SerializeField]
-    System.Action inputUpdater;
-    [SerializeField]
-    System.Action moveUpdater;
-    [SerializeField]
-    System.Action stateUpdater;
+
     [SerializeField]
     Vector2 respownPos;
     [SerializeField]
@@ -51,14 +52,14 @@ public class PlayerController : MonoBehaviour
     private GamepadInput.GamepadState gamepadState;
     [SerializeField]
     private GamepadInput.GamepadState gamepadStateOld;
-    [SerializeField]
-    private Vector2 moveVelocity = Vector2.zero;
-    [SerializeField]
-    private Vector2 velocityClamp;
-    [SerializeField]
-    private float angulerVelocity = 0.0f;
+
+
     [SerializeField]
     private float chargeTime = 0.0f;
+
+    System.Action inputUpdater;
+    System.Action moveUpdater;
+    System.Action stateUpdater;
 
     private void Initialized()
     {
@@ -239,12 +240,12 @@ public class PlayerController : MonoBehaviour
 
     void Normal()
     {
-        if (gamepadState.A && !gamepadStateOld.A)
+        if (gamepadState.A)
         {
             moveUpdater = Charge;
             return;
         }
-        else if (gamepadState.B && !gamepadStateOld.B)
+        else if (gamepadState.B)
         {
             moveUpdater = Brake;
             return;
@@ -283,7 +284,7 @@ public class PlayerController : MonoBehaviour
             //二倍の減衰でブレーキ
             Vector2 dump = rigid.velocity * brakeDump * 2.0f;
             rigid.velocity -= dump * Time.deltaTime;
-            if (rigid.velocity.SqrMagnitude()<=0.001f)
+            if (rigid.velocity.SqrMagnitude() <= 0.001f)
             {
                 rigid.velocity = Vector2.zero;
             }
