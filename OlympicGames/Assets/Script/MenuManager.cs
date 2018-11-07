@@ -35,6 +35,7 @@ public class MenuManager : MonoBehaviour
 				//初期化
 				private void Initialized()
 				{
+								Instantiate(Resources.Load("Prefab/Star"));
 								input_updater = GamepadStateUpdate;
 								player_updater = PlayerUpdate;
 								is_menu_end = false;
