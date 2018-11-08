@@ -124,7 +124,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1430210945632414}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -1.62, y: 0.46, z: 0}
   m_LocalScale: {x: 0.00005, y: 0.00005, z: 1}
   m_Children:
   - {fileID: 4878901629258342}
@@ -188,7 +188,7 @@ CircleCollider2D:
   m_GameObject: {fileID: 1430210945632414}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 7e4621d9c9c158a49ae6377d88017096, type: 2}
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -207,8 +207,8 @@ CapsuleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 49.999954, y: -3678.4485}
-  m_Size: {x: 1449.7638, y: 5127.931}
+  m_Offset: {x: 49.999954, y: -2646.941}
+  m_Size: {x: 1730.776, y: 3690.0168}
   m_Direction: 0
 --- !u!114 &114518134666962686
 MonoBehaviour:
@@ -247,12 +247,20 @@ MonoBehaviour:
   blinkInvincibleTime: 0.001
   attackTime: 0.3
   attackTime2: 0.59
+  attakable: 1
   respawnTime: 1
   deadSE: {fileID: 0}
   boostSE: {fileID: 0}
   moveSE: {fileID: 0}
   downSE: {fileID: 0}
   slashSE: {fileID: 0}
+  DeadResourceName: 
+  ColdResourceName: 
+  Attack1ResourceName: 
+  Attack2ResourceName: 
+  MoveResourceName: 
+  InvincibleResourceName: 
+  spriteRenderer: {fileID: 0}
   slasherCollider: {fileID: 70081906048927556}
 --- !u!212 &212550029642299932
 SpriteRenderer:
