@@ -22,13 +22,16 @@ public class PlayerUICanvas : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        image = this.GetComponent<Image>();
-        text = this.GetComponent<Text>();
+
+    }
+    public void Initialized()
+    {
+        image = this.GetComponentInChildren<Image>();
+        text = this.GetComponentInChildren<Text>();
         rectTransform = this.GetComponent<RectTransform>();
     }
-    
     // Update is called once per frame
-	void Update () {
+    void Update () {
         text.text = "" + playerStock;
     }
 
@@ -45,6 +48,11 @@ public class PlayerUICanvas : MonoBehaviour {
     public void SetPlayerStock(uint stockNum)
     {
         playerStock = stockNum;
+        if (playerStock == 0)
+        {
+            image.color = new Color(image.color.r, image.color.g, image.color.b, 0.5f);
+            text.color = new Color(text.color.r, text.color.g, text.color.b, 0.5f);
+        }
     }
 
 }

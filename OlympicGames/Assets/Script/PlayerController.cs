@@ -98,10 +98,14 @@ public class PlayerController : MonoBehaviour
 
     public void Initialized()
     {
+        spriteRenderer = this.gameObject.GetComponent<SpriteRenderer>();
+        rigid = this.GetComponent<Rigidbody2D>();
+        //slasherCollider = this.GetComponentInChildren<CapsuleCollider2D>();
+        slasherCollider.enabled = false;
         isCollided = false;
         moveVelocity = Vector2.zero;
         angulerVelocity = 0.0f;
-        stateUpdater = Normal;
+        stateUpdater = Wait;
         inputUpdater = GamePadStateUpdate;
         gamepadStateOld = gamepadState = GamepadInput.GamePad.GetState(playerNo);
         angulerVelocity = 0.0f;
@@ -190,6 +194,9 @@ public class PlayerController : MonoBehaviour
 
     public void SetUpdaterToWait()
     {
+        rigid.velocity = Vector2.zero;
+        rigid.angularVelocity = 0.0f;
+
         stateUpdater = Wait;
     }
 

@@ -72,3 +72,4 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d17b29a1e2ebccd41a1ec0ef8ccf8a33, type: 3}
   fade: {fileID: 0}
   shaker: {fileID: 0}
+  playerCanvasController: {fileID: 0}
