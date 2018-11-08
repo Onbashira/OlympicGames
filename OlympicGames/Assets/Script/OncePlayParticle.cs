@@ -12,8 +12,9 @@ public class OncePlayParticle : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (ptSys.IsAlive(true)) {
+        if (ptSys.IsAlive(true) || ptSys.isStopped) {
             Destroy(this);
         }
+
     }
 }

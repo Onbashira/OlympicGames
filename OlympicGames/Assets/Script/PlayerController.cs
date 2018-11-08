@@ -97,6 +97,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     string Attack2ResourceName;
     [SerializeField]
+    string AttackReCasttEffectResourceName;
+    [SerializeField]
     string MoveResourceName;
     [SerializeField]
     string InvincibleResourceName;

@@ -52,9 +52,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxFadeUpdateTime: 1
-  maxPreUpdateTime: 2
-  maxStartGameTime: 2
-  maxGameSetTime: 2
+  maxPreUpdateTime: 1.3
+  maxStartGameTime: 1.3
+  maxGameSetTime: 1.3
   maxGameEndTime: 1
   gameStepTime: 0
   isPreUpdatePassed: 0

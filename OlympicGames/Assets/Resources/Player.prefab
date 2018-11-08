@@ -254,6 +254,13 @@ MonoBehaviour:
   moveSE: {fileID: 0}
   downSE: {fileID: 0}
   slashSE: {fileID: 0}
+  DeadResourceName: 
+  ColdResourceName: 
+  Attack1ResourceName: 
+  Attack2ResourceName: 
+  MoveResourceName: 
+  InvincibleResourceName: 
+  spriteRenderer: {fileID: 0}
   slasherCollider: {fileID: 70081906048927556}
 --- !u!212 &212550029642299932
 SpriteRenderer:
