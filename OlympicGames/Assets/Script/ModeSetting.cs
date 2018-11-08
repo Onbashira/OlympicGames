@@ -33,8 +33,12 @@ public class ModeSetting : MonoBehaviour
 
 				[SerializeField]
 				public static List<PlayerData> player_data = new List<PlayerData>();
-				public static bool[] is_connect = new bool[4];
+				public static bool[] is_connect = new bool[4];//繋がっているかどうか
 
+				//繋がったタイミングかどうか
+				public enum ConnectState { ON, OFF, NON};
+				public static ConnectState[] is_connect_now = new ConnectState[4];//現在の状態
+				
 				//プレイヤーのカラーの順番
 				public enum ColorIndex { GREEN, ORANGE, PINK, PURPLE, RED, BLUE, WHITE, YELLOW };
 				private const int k_color_num_max = 7;//キャラのカラー最大値
@@ -133,6 +137,12 @@ public class ModeSetting : MonoBehaviour
 				{
 								ControllerFetcher.Initialize();
 								
+								for(int i = 0;i < 4;i++)
+								{
+												//つながっている状態を初期化
+												is_connect_now[i] = ConnectState.NON;
+								}
+
 								//コントローラーとの関係を確認
 								for (int i = 0; i < k_player_num_max; i++)
 								{
@@ -158,7 +168,6 @@ public class ModeSetting : MonoBehaviour
 
 												if (pd.is_connected && is_connected || !pd.is_connected && !is_connected)
 												{
-																//コントローラーに変更はなかった
 																continue;
 												}
 
@@ -174,6 +183,7 @@ public class ModeSetting : MonoBehaviour
 																}
 																Debug.Log("コントローラー" + i + "がプレイヤー"+ (player_data.Count + 1) + "Pとして参加しました");
 																pd.player_number = i;//プレイヤーとコントローラーの関連付け
+																is_connect_now[player_data.Count] = ConnectState.ON;
 																player_data.Add(pd);//新しいコントローラー追加
 																ChangePlayerColor(player_data.Count - 1, 1);
 																is_connect[i] = true;
@@ -186,19 +196,17 @@ public class ModeSetting : MonoBehaviour
 																{
 																				continue;
 																}
-
 																for (int j = 0; j < player_data.Count; j++)
 																{
 																				if (player_data[j].player_number != i)
 																				{
 																								continue;
 																				}
-																				//現在繋がっているプレイヤー
+																				//つながりが切れたプレイヤーデータ
+																				is_connect_now[j] = ConnectState.ON;
 																				player_data.RemoveAt(j);
 																}
-
 																Debug.Log("コントローラーの接続が切れました(" + i + ")");
-
 																is_connect[i] = false;
 												}
 												//コントローラーの追加はなかった
