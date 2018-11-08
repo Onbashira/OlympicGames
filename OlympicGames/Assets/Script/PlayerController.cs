@@ -69,6 +69,8 @@ public class PlayerController : MonoBehaviour
     float attackTime2 = 1.0f;
     float attackTimer2 = 0.0f;
     [SerializeField]
+    bool attakable = true;
+    [SerializeField]
     float respawnTime = 1.0f;
     float respawnTimer = 0.0f;
     [SerializeField]
@@ -296,10 +298,10 @@ public class PlayerController : MonoBehaviour
     void Attack()
     {
         Vector2 boostVelo = (Vector2.up * boostPower);
-
+        attakable = false;
         rigid.AddRelativeForce(boostVelo, ForceMode2D.Impulse);
 
-        // StartCoroutine(AttakerUpdate(1.0f));
+        StartCoroutine(AttackCoolTime(2.0f));
         stateUpdater = AttackAction1;
         RotatePlayer();
     }
@@ -454,9 +456,10 @@ public class PlayerController : MonoBehaviour
             stateUpdater = Move;
             return;
         }
-        else if (gamepadState.Y && !gamepadStateOld.Y)
+        else if (gamepadState.Y && !gamepadStateOld.Y && attakable)
         {
             stateUpdater = Attack;
+
             return;
         }
         else if (gamepadState.B && !gamepadStateOld.B)
@@ -513,6 +516,18 @@ public class PlayerController : MonoBehaviour
         spriteRenderer.enabled = true;
         isInvincible = false;
         blinkTimer = 0.0f;
+    }
+
+    private IEnumerator AttackCoolTime(float duration)
+    {
+        var elapsed = 0.0f;
+
+        while (elapsed < invincibleTime)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        attakable = true;
     }
 
     void GamePadStateUpdate()

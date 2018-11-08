@@ -124,7 +124,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1430210945632414}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -1.62, y: 0.46, z: 0}
   m_LocalScale: {x: 0.00005, y: 0.00005, z: 1}
   m_Children:
   - {fileID: 4878901629258342}
@@ -247,6 +247,7 @@ MonoBehaviour:
   blinkInvincibleTime: 0.001
   attackTime: 0.3
   attackTime2: 0.59
+  attakable: 1
   respawnTime: 1
   deadSE: {fileID: 0}
   boostSE: {fileID: 0}
