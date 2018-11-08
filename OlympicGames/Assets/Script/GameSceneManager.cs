@@ -59,7 +59,7 @@ public class GameSceneManager : MonoBehaviour
     private Fade fade = null;
     [SerializeField]
     CameraShaker shaker = null;
-
+    [SerializeField]
     private uint maxPlayer;
     private uint deadCount;
 
@@ -86,22 +86,13 @@ public class GameSceneManager : MonoBehaviour
         //Lutが必要
         //Test
 
-        //for (int i = 0; i < ModeSetting.player_data.Count; i++)
-        //{
-        //    ModeSetting.PlayerData pd = ModeSetting.player_data[i];
-        //    pd.color = (ModeSetting.ColorIndex)i;
-        //    pd.handicap = 2;
-        //    pd.is_connected = false;
-        //    pd.player_number = (int)(i + 1);
-        //}
-
         foreach (var pl in ModeSetting.player_data)
         {
-            players.Add(Instantiate((GameObject)Resources.Load("Player"), respawnParamaters[pl.player_number].pos, Quaternion.AngleAxis(respawnParamaters[pl.player_number].rotation, Vector3.forward)));
+            players.Add(Instantiate((GameObject)Resources.Load("Player"), respawnParamaters[pl.player_number + 1].pos, Quaternion.AngleAxis(respawnParamaters[pl.player_number + 1].rotation, Vector3.forward)));
 
             players[players.Count - 1].GetComponent<PlayerController>().Initialized();
-            players[players.Count - 1].GetComponent<PlayerController>().SetPlayerNO(pl.player_number);
-            players[players.Count - 1].GetComponent<PlayerController>().SetRespownParamater(respawnParamaters[pl.player_number].pos, respawnParamaters[pl.player_number].rotation);
+            players[players.Count - 1].GetComponent<PlayerController>().SetPlayerNO(pl.player_number + 1);
+            players[players.Count - 1].GetComponent<PlayerController>().SetRespownParamater(respawnParamaters[pl.player_number + 1].pos, respawnParamaters[pl.player_number + 1].rotation);
             players[players.Count - 1].GetComponent<PlayerController>().SetUpdaterToWait();
             players[players.Count - 1].GetComponent<SpriteRenderer>().sprite = this.characterTextures[(int)pl.color];
         }
@@ -140,10 +131,19 @@ public class GameSceneManager : MonoBehaviour
         {
             gameStepTime = 0.0f;
             isGameStartPassed = true;
-
+            AllPlayerActive();
             gameUpdater = GameUpdateNormal;
         }
     }
+
+    void AllPlayerActive()
+    {
+        foreach (var pl in players)
+        {
+            pl.GetComponent<PlayerController>().SetUpdaterToNormal();
+        }
+    }
+    
     //ゲームの通常アップデート　もしもこのアップデート中にプレイヤーの残機がゼロになるなどでゲームセットフェーズに移行
     void GameUpdateNormal()
     {
@@ -158,13 +158,16 @@ public class GameSceneManager : MonoBehaviour
             }
             if (p.IsDead())
             {
+                GameResultManager.GetPlayerRank().Add((int)p.GetPlayerNO());
                 p.DeadPlayer();
+
                 ++deadCount;
-                if (deadCount >= maxPlayer)
-                {
-                    gameUpdater = GameUpdateGameSet;
-                    return;
-                }
+
+            }
+            if (deadCount == maxPlayer - 1)
+            {
+                gameUpdater = GameUpdateGameSet;
+                return;
             }
         }
     }

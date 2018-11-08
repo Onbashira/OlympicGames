@@ -6,7 +6,7 @@ public static class GameResultManager
 {
     //Rank順に格納されたリスト
     [SerializeField]
-    private static List<int> playerRankList;
+    private static List<int> playerRankList = new List<int>();
 
     public static List<int> GetPlayerRank()
     {

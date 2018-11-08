@@ -35,8 +35,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     GamepadInput.GamePad.Index playerNo;
     [SerializeField]
-    uint playerStock = 0;
+    public uint playerStock = 0;
     Vector2 deadPos = Vector2.zero;
+    Vector3 deadRotation = Vector3.zero;
     [SerializeField]
     bool isDead = false;
     [SerializeField]
@@ -98,9 +99,9 @@ public class PlayerController : MonoBehaviour
     public void Initialized()
     {
         isCollided = false;
-        stateUpdater = Normal;
         moveVelocity = Vector2.zero;
         angulerVelocity = 0.0f;
+        stateUpdater = Normal;
         inputUpdater = GamePadStateUpdate;
         gamepadStateOld = gamepadState = GamepadInput.GamePad.GetState(playerNo);
         angulerVelocity = 0.0f;
@@ -170,12 +171,21 @@ public class PlayerController : MonoBehaviour
         playerNo = (GamepadInput.GamePad.Index)index;
     }
 
+    public uint GetPlayerNO()
+    {
+        return (uint)playerNo;
+    }
+
+    public uint GetPlayerStock()
+    {
+        return (uint)playerStock;
+    }
+
     public void SetRespownParamater(Vector2 pos, float rotate)
     {
 
         this.respownPos = pos;
         this.respownRotate = rotate;
-
     }
 
     public void SetUpdaterToWait()
@@ -245,6 +255,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 tempVelo = (Vector2.up * movePower);
         rigid.AddRelativeForce(tempVelo, ForceMode2D.Impulse);
+        //Instantiate(Resources.Load("boostSmoke"),this.transform.position,this.transform.rotation);
         moveVelocity = rigid.velocity;
         stateUpdater = Normal;
     }
@@ -365,6 +376,7 @@ public class PlayerController : MonoBehaviour
                 isCollided = true;
                 --playerStock;
                 deadPos = transform.position;
+                deadRotation = transform.rotation.eulerAngles;
                 stateUpdater = Dead;
 
             }
@@ -378,7 +390,11 @@ public class PlayerController : MonoBehaviour
 
     public void DeadPlayer()
     {
-        enabled = false;
+        this.enabled = false;
+        spriteRenderer.enabled = false;
+        GameResultManager.GetPlayerRank().Add((int)this.playerNo);
+        stateUpdater = GameOver;
+        isDead = true;
     }
 
     void Dead()
@@ -393,6 +409,8 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            this.rigid.velocity = Vector2.zero;
+
             stateUpdater = Respawn;
             isInvincible = true;
             StartCoroutine(Invincible());
@@ -407,11 +425,13 @@ public class PlayerController : MonoBehaviour
         {
             respawnTimer= 1.0f;
             this.transform.position = Vector3.Lerp(deadPos, respownPos, respawnTimer);
+            this.transform.eulerAngles = Vector3.Slerp(deadRotation, new Vector3(0.0f,0.0f,respownRotate), respawnTimer);
             respawnTimer = 0.0f;
             stateUpdater = Normal;
             return;
         }
         this.transform.position = Vector3.Lerp(deadPos, respownPos, respawnTimer);
+        this.transform.eulerAngles = Vector3.Slerp(deadRotation, new Vector3(0.0f, 0.0f, respownRotate), respawnTimer);
 
     }
 
