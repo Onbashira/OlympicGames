@@ -88,6 +88,21 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     AudioSource slashSE;
 
+    [SerializeField]
+    string DeadResourceName;
+    [SerializeField]
+    string ColdResourceName;
+    [SerializeField]
+    string Attack1ResourceName;
+    [SerializeField]
+    string Attack2ResourceName;
+    [SerializeField]
+    string MoveResourceName;
+    [SerializeField]
+    string InvincibleResourceName;
+    [SerializeField]
+
+
     SpriteRenderer spriteRenderer = null;
 
     System.Action inputUpdater;
@@ -264,7 +279,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 tempVelo = (Vector2.up * movePower);
         rigid.AddRelativeForce(tempVelo, ForceMode2D.Impulse);
-        //Instantiate(Resources.Load("boostSmoke"),this.transform.position,this.transform.rotation);
+        Instantiate(Resources.Load("boostSmoke"),this.transform.position,this.transform.rotation);
         moveVelocity = rigid.velocity;
         stateUpdater = Normal;
     }
@@ -300,6 +315,7 @@ public class PlayerController : MonoBehaviour
         Vector2 boostVelo = (Vector2.up * boostPower);
         attakable = false;
         rigid.AddRelativeForce(boostVelo, ForceMode2D.Impulse);
+        Instantiate(Resources.Load(Attack1ResourceName), this.transform.position, this.transform.rotation);
 
         StartCoroutine(AttackCoolTime(2.0f));
         stateUpdater = AttackAction1;
@@ -316,6 +332,7 @@ public class PlayerController : MonoBehaviour
         {
             rigid.angularVelocity = 0.0f;
 
+            Instantiate(Resources.Load(Attack2ResourceName), this.transform.position, this.transform.rotation);
 
             slasherCollider.enabled = true;
             attackTimer = 0.0f;
@@ -352,13 +369,33 @@ public class PlayerController : MonoBehaviour
             if (collision.gameObject.tag == "Player")
             {
                 PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+                Instantiate(Resources.Load(ColdResourceName), this.transform.position, this.transform.rotation);
 
-
-                if (player.moveVelocity.SqrMagnitude() >= moveVelocity.SqrMagnitude())
+                //相手が早かったならば
+                if (player.moveVelocity.SqrMagnitude() <= moveVelocity.SqrMagnitude())
                 {
+                    var opoVelo = player.rigid.velocity;
+                    var myVelo = this.rigid.velocity;
 
-                    rigid.velocity += player.rigid.velocity / 2.0f;
-                    player.rigid.velocity /= 2.0f;
+                    Vector2 vec = -(player.transform.position - this.transform.position).normalized;
+
+                    var newVec = Vector2.Dot( opoVelo,vec) * vec;
+
+                    rigid.velocity += newVec;
+
+                    //rigid.velocity += player.rigid.velocity / 2.0f;
+                    //player.rigid.velocity /= 2.0f;
+                }
+                else
+                {
+                    var opoVelo = player.rigid.velocity;
+                    var myVelo = this.rigid.velocity;
+
+                    var vec = (player.transform.position - this.transform.position).normalized;
+
+                    Vector2 newVec = Vector2.Dot(myVelo, vec) * vec;
+
+                    rigid.velocity += newVec;
                 }
 
 
@@ -368,9 +405,11 @@ public class PlayerController : MonoBehaviour
             {
                 PlayerController player = collision.gameObject.GetComponentInParent<PlayerController>();
 
+                Instantiate(Resources.Load(ColdResourceName), this.transform.position, this.transform.rotation);
 
 
                 var vec = -(player.transform.position - this.transform.position).normalized;
+
                 this.rigid.velocity = vec * AttackPower;
 
                 slasherCollider.enabled = false;
@@ -380,6 +419,9 @@ public class PlayerController : MonoBehaviour
 
             if (collision.gameObject.tag == "Wall") //壁との衝突時
             {
+                Instantiate(Resources.Load(ColdResourceName), this.transform.position, this.transform.rotation);
+
+
                 slasherCollider.enabled = false;
 
                 isCollided = true;
@@ -408,18 +450,19 @@ public class PlayerController : MonoBehaviour
 
     void Dead()
     {
+        Instantiate(Resources.Load(DeadResourceName), this.transform.position, this.transform.rotation);
+
         if (playerStock <= 0)
         {
             stateUpdater = GameOver;
             isDead = true;
             GameResultManager.GetPlayerRank().Add((int)this.playerNo);
-           
+
             //Destroy(this);
         }
         else
         {
             this.rigid.velocity = Vector2.zero;
-
             stateUpdater = Respawn;
             isInvincible = true;
             StartCoroutine(Invincible());
@@ -432,9 +475,9 @@ public class PlayerController : MonoBehaviour
         respawnTimer += Time.deltaTime;
         if (respawnTimer >= 1.0f)
         {
-            respawnTimer= 1.0f;
+            respawnTimer = 1.0f;
             this.transform.position = Vector3.Lerp(deadPos, respownPos, respawnTimer);
-            this.transform.eulerAngles = Vector3.Slerp(deadRotation, new Vector3(0.0f,0.0f,respownRotate), respawnTimer);
+            this.transform.eulerAngles = Vector3.Slerp(deadRotation, new Vector3(0.0f, 0.0f, respownRotate), respawnTimer);
             respawnTimer = 0.0f;
             stateUpdater = Normal;
             return;
@@ -495,11 +538,12 @@ public class PlayerController : MonoBehaviour
         //}
 
     }
-    
+
     private IEnumerator Invincible(float duration = 0.0f)
     {
 
         var elapsed = 0.0f;
+        var effect = Instantiate((GameObject)Resources.Load(InvincibleResourceName), this.transform).GetComponent<ParticleSystem>();
 
         while (elapsed < invincibleTime)
         {
@@ -512,6 +556,10 @@ public class PlayerController : MonoBehaviour
                 spriteRenderer.enabled = !flg;
             }
             yield return null;
+        }
+        if (effect.IsAlive(true))
+        {
+            Destroy(effect);
         }
         spriteRenderer.enabled = true;
         isInvincible = false;
