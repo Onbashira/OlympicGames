@@ -64,6 +64,11 @@ public class GameSceneManager : MonoBehaviour
     private uint maxPlayer;
     private uint deadCount;
 
+    GameObject gameStartCatin;
+    GameObject readyCatin;
+    GameObject gameSetCatin;
+
+
     // Use this for initialization
     void Start()
     {
@@ -107,6 +112,7 @@ public class GameSceneManager : MonoBehaviour
         fade.FadeIn(maxFadeUpdateTime, () =>
         {
             gameUpdater = GameUpdatePreUpdate;
+            readyCatin = Instantiate((GameObject)Resources.Load("ReadyCatin"), playerCanvasController.transform);
 
         });
     }
@@ -123,6 +129,8 @@ public class GameSceneManager : MonoBehaviour
 
         if (gameStepTime >= maxPreUpdateTime)
         {
+            gameStartCatin = Instantiate((GameObject)Resources.Load("GameStartCatin"), playerCanvasController.transform);
+
             gameStepTime = 0.0f;
             isPreUpdatePassed = true;
             gameUpdater = GameUpdateStartGame;
@@ -182,6 +190,8 @@ public class GameSceneManager : MonoBehaviour
             {
                 AllPlayerWait();
                 gameUpdater = GameUpdateGameSet;
+                gameSetCatin = Instantiate((GameObject)Resources.Load("GameSetCatin"),playerCanvasController.transform);
+
                 return;
             }
         }
