@@ -10,7 +10,7 @@ public class StockSetting : MonoBehaviour
 				
 				private void Start()
 				{
-								stock_tex = transform.Find("StockText").GetComponent<Text>();
+								stock_tex = GetComponent<Text>();
 				}
 				
 				private void Update()

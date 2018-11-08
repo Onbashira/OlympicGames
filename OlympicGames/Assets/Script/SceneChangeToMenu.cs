@@ -14,7 +14,7 @@ public class SceneChangeToMenu : MonoBehaviour
 				// Update is called once per frame
 				void Update()
 				{
-
+								ModeSetting.ConnectedUpdate();
 
 								if (GamepadInput.GamePad.GetButton(GamepadInput.GamePad.Button.A, (GamepadInput.GamePad.Index)0))
 								{

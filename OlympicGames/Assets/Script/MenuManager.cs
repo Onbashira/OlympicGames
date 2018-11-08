@@ -6,11 +6,15 @@ using GamepadInput;
 using UnityEngine.SceneManagement;
 
 //メニュー内でのプレイヤーの行動からなる処理を書いていく
+//2
+//4
+//1
+//のメニュー状態での処理
 public class MenuManager : MonoBehaviour
 {
 				//メニュー構成 どのメニューを選択しているか
 				//左上　STOCK,　右上　GIMICK,　中心　PLAYER,　右下　SETEND
-				enum MenuUI { STOCK, GIMICK, PLAYER, SETEND };
+				enum MenuUI { STOCK, PLAYER1, PLAYER2, PLAYER3, PLAYER4, SETEND };
 
 				struct PlayerCarsor
 				{
@@ -22,53 +26,49 @@ public class MenuManager : MonoBehaviour
 				//1,2は、ストックの変更の場所へ
 				//3,4は、ギミックの変更の場所へ
 				//カーソルが現在どのUIを選択しているのか
-				private List<PlayerCarsor> player_carsor = new List<PlayerCarsor>();
-				
-				public List<GameObject> ui_data = new List<GameObject>();
-				
+				private PlayerCarsor player_carsor = new PlayerCarsor();
+
+				public RectTransform stock_ui_data;
+				public RectTransform select_ui_data;
+				public List<RectTransform> player_ui_data = new List<RectTransform>();
+
 				//メニュ―で設定する機能
 				private StockSetting stock_set;//ストックの設定を行う
 				private GimickSetting gimick_set; //ギミックを使用するかどうか
 
 				//入力を判断するための差分
-				private GamepadInput.GamepadState[] gamepad_state = new GamepadInput.GamepadState[4];
-				private GamepadInput.GamepadState[] gamepad_state_old = new GamepadInput.GamepadState[4];
-				
+				private GamepadInput.GamepadState gamepad_state = new GamepadInput.GamepadState();
+				private GamepadInput.GamepadState gamepad_state_old = new GamepadInput.GamepadState();
+
 				//ルールの決定が終わりました
 				public bool is_menu_end;
 
-				System.Action input_updater;
-				System.Action player_updater;
-				
 				//初期化
 				public void Initialized()
 				{
-								input_updater = GamepadStateUpdate;
-								player_updater = PlayerUpdate;
 								is_menu_end = false;
+								CleateCarsor();
 				}
 
 				private void Start()
 				{
 								stock_set = transform.Find("Stock").GetComponent<StockSetting>();
-								gimick_set = transform.Find("Gimick").GetComponent<GimickSetting>();
 								
-
 								Initialized();
 								for (int i = 0; i < ModeSetting.k_player_num_max; i++)
 								{
-												gamepad_state[i] = gamepad_state_old[i] = GamePad.GetState((GamePad.Index)0);
+												gamepad_state = gamepad_state_old = GamePad.GetState((GamePad.Index)0);
 								}
 				}
 
 				void Update()
 				{
-								ModeSetting.ChackPlayerConnected();
-								if(!is_menu_end)
+								ModeSetting.ConnectedUpdate();
+								if (!is_menu_end)
 								{
 												//セレクトの処理がまだ終わっていません
-												input_updater();
-												player_updater();
+												GamepadStateUpdate();
+												PlayerUpdate();
 								}
 								else
 								{
@@ -82,243 +82,207 @@ public class MenuManager : MonoBehaviour
 				//プレイヤーの行動
 				private void PlayerUpdate()
 				{
-								for (int i = 0; i < ModeSetting.player_data.Count; i++)
+								if (ModeSetting.player_data.Count == 0)
 								{
-												if (!ModeSetting.player_data[i].is_connected)
-												{
-																//コントローラーとの接続が絶たれています
-																Debug.Log(i + "Pの接続が確認できません");
-																continue;
-												}
+												//コントローラーとの接続が絶たれています
+												Debug.Log("1Pの接続が確認できません");
+								}
 
-												if(ModeSetting.is_connect_now[i] == ModeSetting.ConnectState.ON)
-												{
-																CleateCarsor();
-																continue;
-												}
-												else if(ModeSetting.is_connect_now[i] == ModeSetting.ConnectState.OFF)
-												{
-																CarsorDeleate(i);
-																continue;
-												}
+								PlayerCarsor p_carsor = player_carsor;
 
-												//テスト処理
-												if(gamepad_state[i].B && !gamepad_state_old[i].B)
-												{
-																//セレクト画面終わり
-																is_menu_end = true;
-																break;
-												}
-
-												PlayerCarsor p_carsor = player_carsor[i];
-
-												//接続が確認できました
-												if (p_carsor.menu_ui == MenuUI.STOCK)
-												{
-																//ストックの関数
-																StockUiBehavior(i);
-																continue;
-												}
-												else if (p_carsor.menu_ui == MenuUI.GIMICK)
-												{
-																//ギミックの関数
-																GimickUiBehavior(i);
-																continue;
-												}
-												else if (p_carsor.menu_ui == MenuUI.PLAYER)
-												{
-																//プレイヤーの関数
-																PlayerUiBehavior(i);
-																continue;
-												}
-												else
-												{
-																//対戦へ移行します
-																SetEndUiBehavior(i);
-																continue;
-												}
+								//接続が確認できました
+								if (p_carsor.menu_ui == MenuUI.STOCK)
+								{
+												//ストックの関数
+												StockUiBehavior();
+								}
+								else if (p_carsor.menu_ui == MenuUI.PLAYER1 ||
+												p_carsor.menu_ui == MenuUI.PLAYER2 ||
+												p_carsor.menu_ui == MenuUI.PLAYER3 ||
+												p_carsor.menu_ui == MenuUI.PLAYER4)
+								{
+												//プレイヤーの関数
+												PlayerUiBehavior();
+								}
+								else
+								{
+												//対戦へ移行します
+												SetEndUiBehavior();
 								}
 				}
 				//ストックUI上での処理
-				private void StockUiBehavior(int player_num)
+				private void StockUiBehavior()
 				{
-								PlayerCarsor p_carsor = player_carsor[player_num];
-								if (gamepad_state[player_num].Right && !gamepad_state_old[player_num].Right)
-								{
-												//ストックからギミックの選択場所へ移動
-												p_carsor.menu_ui = MenuUI.GIMICK;
-												//ここでカーソルの移動処理を
-												SetCarsorPos(player_num);
-												return;
-								}
-								else if (gamepad_state[player_num].Down && !gamepad_state_old[player_num].Down)
-								{
-												//ストックからプレイヤーの色選択へ移動
-												p_carsor.menu_ui = MenuUI.PLAYER;
-												//ここでカーソルの移動処理を
-												SetCarsorPos(player_num);
-												return;
-								}
-								else if (gamepad_state[player_num].LeftShoulder && !gamepad_state_old[player_num].LeftShoulder)
+								if (gamepad_state.LeftShoulder && !gamepad_state_old.LeftShoulder)
 								{
 												//ストックの減算
 												ModeSetting.ChangeRemaining(-1);
+												return;
 								}
-								else if (gamepad_state[player_num].RightShoulder && !gamepad_state_old[player_num].RightShoulder)
+								else if (gamepad_state.RightShoulder && !gamepad_state_old.RightShoulder)
 								{
 												//ストックの加算
 												ModeSetting.ChangeRemaining(1);
+												return;
 								}
-				}
-
-				//ギミックUI上での処理
-				private void GimickUiBehavior(int player_num)
-				{
-								PlayerCarsor p_carsor = player_carsor[player_num];
-								if (gamepad_state[player_num].Left && !gamepad_state_old[player_num].Left)
-								{
-												//ストックからギミックの選択場所へ移動
-												p_carsor.menu_ui = MenuUI.GIMICK;
-												//ここでカーソルの移動処理を
-												SetCarsorPos(player_num);
-								}
-								else if (gamepad_state[player_num].Down && !gamepad_state_old[player_num].Down)
+								if (gamepad_state.Down && !gamepad_state_old.Down)
 								{
 												//ストックからプレイヤーの色選択へ移動
-												p_carsor.menu_ui = MenuUI.PLAYER;
-												//ここでカーソルの移動処理を
-												SetCarsorPos(player_num);
+												player_carsor.menu_ui = MenuUI.PLAYER1;
 								}
-
-								//ギミックの変更
-								else if (gamepad_state[player_num].LeftShoulder && !gamepad_state_old[player_num].LeftShoulder)
-								{
-												//ストックの減算
-												ModeSetting.ChangeIsGimick();
-								}
-								else if (gamepad_state[player_num].RightShoulder && !gamepad_state_old[player_num].RightShoulder)
-								{
-												//ストックの加算
-												ModeSetting.ChangeIsGimick();
-								}
-								player_carsor[player_num] = p_carsor;
+								//ここでカーソルの移動処理を
+								SetCarsorPos();
 				}
 
-				private void PlayerUiBehavior(int player_num)
+				private void PlayerUiBehavior()
 				{
-								PlayerCarsor p_carsor = player_carsor[player_num];
-								if (gamepad_state[player_num].Up && !gamepad_state_old[player_num].Up)
+								if(ModeSetting.player_data.Count == 0)
 								{
-												if(player_num < 2)
+												//なにも接続されていない
+												Debug.Log("１Pの接続を確認できません");
+												return;
+								}
+
+								//LRでのカラー変換
+								if (gamepad_state.LeftShoulder && !gamepad_state_old.LeftShoulder)
+								{
+												ModeSetting.ChangePlayerColor((int)player_carsor.menu_ui - 1, -1);
+								}
+								else if (gamepad_state.RightShoulder && !gamepad_state_old.RightShoulder)
+								{
+												ModeSetting.ChangePlayerColor((int)player_carsor.menu_ui - 1, 1);
+								}
+
+								//プレイヤーのカーソル移動をする
+								//上
+								if (gamepad_state.Up && !gamepad_state_old.Up)
+								{
+												if (player_carsor.menu_ui == MenuUI.PLAYER1 ||
+																player_carsor.menu_ui == MenuUI.PLAYER2)
 												{
 																//画面左側のプレイヤーはストックの選択場所へ移動
-																p_carsor.menu_ui = MenuUI.STOCK;
+																player_carsor.menu_ui = MenuUI.STOCK;
 												}
 												else
 												{
-																//画面右側のプレイヤーはギミックの選択場所へ移動
-																p_carsor.menu_ui = MenuUI.GIMICK;
+																player_carsor.menu_ui -= 2;
 												}
-
-
-												//更新しろやーーーーーーーー
-
-												//ここでカーソルの移動処理を
-												SetCarsorPos(player_num);
 								}
-								else if (gamepad_state[player_num].Down && !gamepad_state_old[player_num].Down)
+								//下
+								else if (gamepad_state.Down && !gamepad_state_old.Down)
 								{
-												//ストックからプレイヤーの色選択へ移動
-												p_carsor.menu_ui = MenuUI.SETEND;
-												//ここでカーソルの移動処理を
-												SetCarsorPos(player_num);
+												if (player_carsor.menu_ui == MenuUI.PLAYER1 ||
+																player_carsor.menu_ui == MenuUI.PLAYER2)
+												{
+																player_carsor.menu_ui += 2;
+												}
+												else
+												{
+																//ストックからプレイヤーの色選択へ移動
+																player_carsor.menu_ui = MenuUI.SETEND;
+												}
 								}
-								//LRでのカラー変換
-								else if (gamepad_state[player_num].LeftShoulder && !gamepad_state_old[player_num].LeftShoulder)
+								//右
+								else if (gamepad_state.Left && !gamepad_state_old.Left)
 								{
-												ModeSetting.ChangePlayerColor(player_num,-1);
+												if (player_carsor.menu_ui == MenuUI.PLAYER2 ||
+												player_carsor.menu_ui == MenuUI.PLAYER4)
+												{
+																player_carsor.menu_ui -= 1;
+												}
 								}
-								else if (gamepad_state[player_num].RightShoulder && !gamepad_state_old[player_num].RightShoulder)
+								else if (gamepad_state.Right && !gamepad_state_old.Right)
 								{
-												ModeSetting.ChangePlayerColor(player_num, 1);
+												if (player_carsor.menu_ui == MenuUI.PLAYER1 ||
+																player_carsor.menu_ui == MenuUI.PLAYER3)
+												{
+																player_carsor.menu_ui += 1;
+												}
 								}
-								player_carsor[player_num] = p_carsor;
-
+								SetCarsorPos();
 				}
 
 				//セレクト終了UI上での処理
-				private void SetEndUiBehavior(int player_num)
+				private void SetEndUiBehavior()
 				{
-								PlayerCarsor p_carsor = player_carsor[player_num];
-								if (gamepad_state[player_num].Up && !gamepad_state_old[player_num].Up)
+								if (gamepad_state.A && !gamepad_state_old.A)
 								{
-												p_carsor.menu_ui = MenuUI.PLAYER;
-												SetCarsorPos(player_num);
-								}
-								if (gamepad_state[player_num].A && !gamepad_state_old[player_num].A)
-								{
+												//誰かがスタートボタンを押しました
 												is_menu_end = true;
+												return;
 								}
-								player_carsor[player_num] = p_carsor;
+								if (gamepad_state.Up && !gamepad_state_old.Up)
+								{
+												player_carsor.menu_ui = MenuUI.PLAYER4;
+								}
+								else
+								{
+												return;
+								}
+								SetCarsorPos();
 				}
 
-				private void SetCarsorPos(int player_num)
+				private void SetCarsorPos()
 				{
-								PlayerCarsor p_carsor = player_carsor[player_num];
+								RectTransform raw;
+								if(player_carsor.menu_ui == MenuUI.STOCK)
+								{
+												raw = stock_ui_data;
+								}
+								else if(player_carsor.menu_ui == MenuUI.PLAYER1 ||
+																player_carsor.menu_ui == MenuUI.PLAYER2 ||
+																player_carsor.menu_ui == MenuUI.PLAYER3 ||
+																player_carsor.menu_ui == MenuUI.PLAYER4)
+								{
+												raw = player_ui_data[(int)player_carsor.menu_ui - 1];
+								}
+								else
+								{
+												raw = select_ui_data;
+								}
+								player_carsor.carsor_prafab.GetComponent<RectTransform>().localPosition =
+												raw.localPosition;
 
-								p_carsor.carsor_prafab.GetComponent<RectTransform>().localPosition = 
-												ui_data[(int)p_carsor.menu_ui].GetComponent<RectTransform>().localPosition;
+								Vector2 size = raw.sizeDelta;
 
-								Vector2 size = ui_data[(int)p_carsor.menu_ui].GetComponent<RectTransform>().sizeDelta;
-								
-								p_carsor.carsor_prafab.transform.Find("LeftUpCarsor").GetComponent<RectTransform>().localPosition = 
+								player_carsor.carsor_prafab.transform.Find("LeftUpCarsor").GetComponent<RectTransform>().localPosition =
 												new Vector3
 												(
 																-size.x / 2,
 																size.y / 2,
 																0.0f
 												);
-								p_carsor.carsor_prafab.transform.Find("RightDownCarsor").GetComponent<RectTransform>().localPosition =
+								player_carsor.carsor_prafab.transform.Find("RightDownCarsor").GetComponent<RectTransform>().localPosition =
 												new Vector3
 												(
 																size.x / 2,
-																-size.y / 2, 
+																-size.y / 2,
 																0.0f
 												);
-								player_carsor[player_num] = p_carsor;
 				}
 
 				public void CleateCarsor()
 				{
-								PlayerCarsor p_carsor;
-								p_carsor.carsor_prafab = Instantiate((GameObject)Resources.Load("PlayerCarsor"), Vector3.zero, Quaternion.identity);
-								p_carsor.carsor_prafab.transform.parent = transform;
-								p_carsor.menu_ui = MenuUI.PLAYER;
-
-								player_carsor.Add(p_carsor);
-								SetCarsorPos(player_carsor.Count - 1);//初期座標に調整
+								player_carsor.carsor_prafab = Instantiate((GameObject)Resources.Load("PlayerCarsor"), Vector3.zero, Quaternion.identity);
+								player_carsor.carsor_prafab.transform.parent = transform;
+								player_carsor.menu_ui = MenuUI.PLAYER1;
+								SetCarsorPos();//初期座標に調整
 				}
-
-				public void CarsorDeleate(int deleate_player)
-				{
-								if(player_carsor.Count <= deleate_player)
-								{
-												return;
-								}
-								player_carsor.RemoveAt(deleate_player);
-				}
-
+				
 				//コントローラーの入力が行われたタイミングをとるために
 				//比べるデータの作成
 				void GamepadStateUpdate()
 				{
 								//使われているコントローラーの情報のみ更新
-								for(int i= 0;i < ModeSetting.player_data.Count;i++)
+								for (int i = 0; i < ModeSetting.player_data.Count; i++)
 								{
-												gamepad_state_old[i] = gamepad_state[i];
+												gamepad_state_old = gamepad_state;
 												//リストに格納されているもの順に調べる
-												gamepad_state[ModeSetting.player_data[i].player_number] =
-																GamePad.GetState((GamePad.Index)ModeSetting.player_data[i].player_number);
+
+												///ここでコントローラーの番号を+1すること
+
+												gamepad_state =	GamePad.GetState((GamePad.Index)ModeSetting.player_data[i].player_number);
+												break;
 								}
 				}
 }

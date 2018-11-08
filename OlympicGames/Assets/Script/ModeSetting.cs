@@ -13,7 +13,7 @@ public class ModeSetting : MonoBehaviour
 				private static int remaining;
 				private const int k_initial_remaining = 2;//初期化時の残機数
 				private const int k_remaining_min = 1;//残機の最低数
-				private const int k_remaining_max = 99;     //最大数
+				private const int k_remaining_max = 5;						//最大数
 
 				//ギミックのありなし
 				public static bool is_Gimick = false;
@@ -36,9 +36,8 @@ public class ModeSetting : MonoBehaviour
 				public static bool[] is_connect = new bool[4];//繋がっているかどうか
 
 				//繋がったタイミングかどうか
-				public enum ConnectState { ON, OFF, NON};
-				public static ConnectState[] is_connect_now = new ConnectState[4];//現在の状態
-				
+				public enum ConnectState { ON, OFF, NON };
+
 				//プレイヤーのカラーの順番
 				public enum ColorIndex { GREEN, ORANGE, PINK, PURPLE, RED, BLUE, WHITE, YELLOW };
 				private const int k_color_num_max = 7;//キャラのカラー最大値
@@ -49,11 +48,12 @@ public class ModeSetting : MonoBehaviour
 				public static void initialized()
 				{
 								remaining = k_initial_remaining;
-								for(int i = 0;i < 4;i++)
+								for (int i = 0; i < 4; i++)
 								{
 												//何ともつながっていない
 												is_connect[i] = false;
 								}
+								ModeSetting.ConnectedUpdate();
 				}
 				//PlayerDataの初期化
 				private static PlayerData PlayerDataInitialized()
@@ -81,20 +81,20 @@ public class ModeSetting : MonoBehaviour
 												remaining = k_remaining_min;
 												return;
 								}
-								else if (remaining < k_remaining_max)
+								else if (remaining > k_remaining_max)
 								{
 												remaining = k_remaining_max;
 												return;
 								}
 				}
 
-				public static void ChangeIsGimick()
-				{
-								is_Gimick = !is_Gimick;
-				}
-
 				public static void ChangePlayerColor(int player_num, int num)
 				{
+								if (player_data.Count <= player_num)
+								{
+												//色を変えようとしているプレイヤーは存在しません
+												return;
+								}
 								PlayerData pd = player_data[player_num];
 								//カラーを変える
 								pd.color += num;
@@ -132,84 +132,178 @@ public class ModeSetting : MonoBehaviour
 								}
 				}
 
+
 				//コントローラーの繋がりを確認する
-				public static void ChackPlayerConnected()
+				public static void ConnectedUpdate()
 				{
 								ControllerFetcher.Initialize();
-								
-								for(int i = 0;i < 4;i++)
+
+								//一つ前の時の確認と比べてプレイヤーの総数が変わっているかの確認をする
+								if (ControllerFetcher.GetMaxConectedController() > ControllerFetcher.GetMaxConectedControllerOld())
 								{
-												//つながっている状態を初期化
-												is_connect_now[i] = ConnectState.NON;
+												//コントローラーの数が増えた
+												PlusPlayer();
 								}
-
-								//コントローラーとの関係を確認
-								for (int i = 0; i < k_player_num_max; i++)
+								else if (ControllerFetcher.GetMaxConectedController() < ControllerFetcher.GetMaxConectedControllerOld())
 								{
-												PlayerData pd = PlayerDataInitialized();
+												//減った
+												DaletePlayer();
+								}
+								//何も変わらなかった
+				}
 
-												//コントローラーは繋がっていたか
-												if (is_connect[i])
+				private static void PlusPlayer()
+				{
+								//新しくコントローラーが追加された
+								string[] connect_data = ControllerFetcher.GetConnectedData();
+								for(int i = 0;i < connect_data.Length; i++)
+								{
+												if(connect_data[i] == "")
 												{
-																//iコントローラーは、player_controller_num[i]番のプレイヤーと繋がっていた
-																for(int j = 0;j < player_data.Count;j ++)
-																{
-																				if(player_data[j].player_number != i)
-																				{
-																								continue;
-																				}
-																				//現在繋がっているプレイヤー
-																				pd = player_data[j];
-																}
-												}
-
-												//現在 i プレイヤーが繋がっているか
-												bool is_connected = ControllerFetcher.GetIsConnected(i);
-
-												if (pd.is_connected && is_connected || !pd.is_connected && !is_connected)
-												{
+																//なんもつながっとらん
 																continue;
 												}
 
-												pd.is_connected = is_connected;
-												//コントローラーの状態に変更はなかったかどうかの確認
-												if (pd.is_connected)
+												for(int j = 0;j < player_data.Count;j++)
 												{
-																//コントローラーが接続された
-																if (player_data.Count > k_player_num_max)
+																if( player_data[j].player_number ==  i )
 																{
-																				//プレイヤーの上限数を超えました//ありえないとは思うが
+																				//既に繋がっていたコントローラーだった
 																				continue;
 																}
-																Debug.Log("コントローラー" + i + "がプレイヤー"+ (player_data.Count + 1) + "Pとして参加しました");
-																pd.player_number = i;//プレイヤーとコントローラーの関連付け
-																is_connect_now[player_data.Count] = ConnectState.ON;
-																player_data.Add(pd);//新しいコントローラー追加
-																ChangePlayerColor(player_data.Count - 1, 1);
-																is_connect[i] = true;
-																continue;
 												}
-												else
-												{
-																//コントローラーとの接続が切れました
-																if (player_data.Count == 0)
-																{
-																				continue;
-																}
-																for (int j = 0; j < player_data.Count; j++)
-																{
-																				if (player_data[j].player_number != i)
-																				{
-																								continue;
-																				}
-																				//つながりが切れたプレイヤーデータ
-																				is_connect_now[j] = ConnectState.ON;
-																				player_data.RemoveAt(j);
-																}
-																Debug.Log("コントローラーの接続が切れました(" + i + ")");
-																is_connect[i] = false;
-												}
-												//コントローラーの追加はなかった
+												//新しい繋がりを確認しました
+												CleateNewPlayer(i);
+												return;
 								}
 				}
+
+				private static void DaletePlayer()
+				{
+								//入力を確認できないコントローラーを確認します
+								string[] connect_data = ControllerFetcher.GetConnectedData();
+
+								List<int> connect_chacker = new List<int>();
+
+								for (int i = 0; i < connect_data.Length; i++)
+								{
+												if (connect_data[i] != "")
+												{
+																//コントローラーの接続を確認
+																continue;
+												}
+
+												for (int j = 0; j < player_data.Count; j++)
+												{
+																if (player_data[j].player_number == i)
+																{
+																				//既に繋がっていたコントローラーだった
+																				connect_chacker.Add(i);
+																				continue;
+																}
+												}
+								}
+								//確認できなかったコントローラーを削除します
+								for(int i = 0;i < player_data.Count;i++)
+								{
+												for(int j = 0; j < connect_chacker.Count;j++)
+												{
+																if(player_data[i].player_number == connect_chacker[j])
+																{
+																				//繋がりありました
+																				continue;
+																}
+																//繋がりを確認
+																player_data.RemoveAt(i);
+												}
+								}
+				}
+
+				private static void CleateNewPlayer(int new_number)
+				{
+								if(new_number == 0)
+								{
+												//接続0のコントローラーのデータでプレイヤーを作成しません
+												return;
+								}
+								if (player_data.Count >= k_player_num_max)
+								{
+												//プレイヤーの数が限界突破した
+												return;
+								}
+								PlayerData pd = new PlayerData();
+								pd.player_number = new_number;
+								player_data.Add(pd);
+								ChangePlayerColor(player_data.Count - 1, 1);
+				}
 }
+
+
+
+//				//コントローラーの状態に変更はなかったかどうかの確認
+//				if (pd.is_connected)
+//				{
+//								//コントローラーが接続された
+//								if (player_data.Count > k_player_num_max)
+//								{
+//												//プレイヤーの上限数を超えました//ありえないとは思うが
+//												continue;
+//								}
+//								Debug.Log("コントローラー" + i + "がプレイヤー" + (player_data.Count + 1) + "Pとして参加しました");
+//								pd.player_number = i;//プレイヤーとコントローラーの関連付け
+//								player_data.Add(pd);//新しいコントローラー追加
+//								ChangePlayerColor(player_data.Count - 1, 1);
+//								is_connect[i] = true;
+//								continue;
+//				}
+//				else
+//				{
+//								//コントローラーとの接続が切れました
+//								if (player_data.Count == 0)
+//								{
+//												continue;
+//								}
+//								for (int j = 0; j < player_data.Count; j++)
+//								{
+//												if (player_data[j].player_number != i)
+//												{
+//																continue;
+//												}
+//												//つながりが切れたプレイヤーデータ
+//												player_data.RemoveAt(j);
+//								}
+//								Debug.Log("コントローラーの接続が切れました(" + i + ")");
+//				}
+//				//コントローラーの追加はなかった
+////}
+//private static void PlayerConnectChack(int num)
+//{
+//				string[] controller_connect = ControllerFetcher.GetConnectedData();
+//				List<int> connect_number = new List<int>();//繋がっているコントローラー
+//																																															//コントローラーとの関係を確認
+//				for (int i = 0; i < controller_connect.Length; i++)
+//				{
+//								//接続があるかどうか
+//								if (controller_connect[i] == "")
+//								{
+//												continue;
+//								}
+//								connect_number.Add(i);
+//								if (connect_number.Count >= player_data.Count + num)
+//								{
+//												break;
+//								}
+//				}
+
+//				int count = 0;
+
+//				//コントローラーがつながっている
+//				for (int i = 0; i < player_data.Count; i++)
+//				{
+
+//				}
+//				if (connect_number.Count == player_data.Count + num)
+//				{
+
+//				}
+//}

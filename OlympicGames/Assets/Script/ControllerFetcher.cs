@@ -8,52 +8,45 @@ public static class ControllerFetcher
 {
     [SerializeField]
     private static int maxConnectedNum = 0; //現在つながれているコントローラ数
-
-    private const int MAX_SUPPORTED_NUM = 4; //デフォルトで4つ
-
-				private static bool[] isConnected = new bool[4] { false,false,false,false };
-
-    // Use this for initialization
-    public static void Initialize()
+				private static int maxConnectedNumOld = 0;//一つ前につながれていた数
+				private static List<string> connectedData = new List<string>();//つながりを設定する
+				private const int MAX_SUPPORTED_NUM = 4; //デフォルトで4つ
+				
+				// Use this for initialization
+				public static void Initialize()
     {
-        var controllerNames = Input.GetJoystickNames();
+								var controllerNames = Input.GetJoystickNames();
         int controllerNum = 0;
 
-        //既に接続されているものから名前があるもの（現在接続されているもの）の数を抽出
+								//既に接続されているものから名前があるもの（現在接続されているもの）の数を抽出
 								//0は全部の入力のため排除
-        for (int i = 0; i < controllerNames.Length; i++)
+								for (int i = 1; i < controllerNames.Length; i++)
         {
-												if(i >= MAX_SUPPORTED_NUM)
-												{
-																Debug.Log("ControllerIndex " + i + "is Missing");
-																break;
-												}
 												if (controllerNames[i] != "")
 												{
 																++controllerNum;
-																
-																isConnected[i] = true;
 																continue;
 												}
-												Debug.Log("ControllerIndex " + i + "is Missing");
-												isConnected[i] = false;
+												//Debug.Log("ControllerIndex " + i + "is Missing");
 								}
-        maxConnectedNum = controllerNum;
-    }
+								maxConnectedNumOld = maxConnectedNum;
+								maxConnectedNum = controllerNum;
+								connectedData = new List<string>(controllerNames);//初期化
+				}
 
     public static uint GetMaxConectedController()
     {
         return (uint)maxConnectedNum;
     }
-
-				public static bool GetIsConnected(int playerNo)
+				public static uint GetMaxConectedControllerOld()
 				{
-								if(playerNo < 0 || playerNo >= MAX_SUPPORTED_NUM)
-								{
-												Debug.Log("取得しようとしたインデックス値が無効です");
-												return false;
-								}
-								return isConnected[playerNo];
+								return (uint)maxConnectedNumOld;
+				}
+
+				public static string[] GetConnectedData()
+				{
+								string[] array = connectedData.ToArray();
+								return array;
 				}
 
 				public static GamepadInput.GamepadState GetPadState(uint playerNo, bool raw = false)

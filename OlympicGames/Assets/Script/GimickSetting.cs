@@ -5,19 +5,17 @@ using UnityEngine.UI;
 
 public class GimickSetting : MonoBehaviour
 {
+				private RawImage gimick_image;
+
+				private void Start()
+				{
+								gimick_image = GetComponent<RawImage>();
+				}
+
 				//ギミックをするかどうかの変更
 				//ただギミックの状態を変更した時に呼ぶこと
 				public void ChangeIsGimick()
 				{
-								transform.Find("GimickChack").transform.GetComponent<RawImage>().enabled =
-												!transform.Find("GimickChack").transform.GetComponent<RawImage>().enabled;
-				}
-
-				private void Update()
-				{
-								if(Input.GetKeyDown(KeyCode.Return))
-								{
-												ChangeIsGimick();
-								}
+								gimick_image.enabled = !gimick_image.enabled;
 				}
 }
