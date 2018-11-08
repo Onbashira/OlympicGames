@@ -84,6 +84,7 @@ public class PlayerController : MonoBehaviour
     System.Action stateUpdater;
     System.Action attackSeq;
 
+    [SerializeField]
     CapsuleCollider2D slasherCollider = null;
 
     public void Initialized()
@@ -102,7 +103,7 @@ public class PlayerController : MonoBehaviour
     {
         spriteRenderer = this.gameObject.GetComponent<SpriteRenderer>();
         rigid = this.GetComponent<Rigidbody2D>();
-        slasherCollider = this.GetComponent<CapsuleCollider2D>();
+        //slasherCollider = this.GetComponentInChildren<CapsuleCollider2D>();
         slasherCollider.enabled = false;
         Initialized();
     }
@@ -346,6 +347,7 @@ public class PlayerController : MonoBehaviour
             }
 
         }
+
         else if (collision.gameObject.tag == "BlackHole") //ギミックとの衝突時
         {
             //Vector3 hole = collision.transform.position;
@@ -355,6 +357,21 @@ public class PlayerController : MonoBehaviour
         {
             slasherCollider.enabled = false;
 
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        //他プレイヤー攻撃との衝突時
+        if (collision.gameObject.tag == "AttackColl")
+        {
+            var player = collision.gameObject.GetComponentInParent<PlayerController>();
+            var vec = -(player.transform.position - this.transform.position).normalized;
+            this.rigid.velocity = vec;
+            stateUpdater = Downed;
+            slasherCollider.enabled = false;
+            Downed();
+            attackTime = 0.0f;
         }
     }
 
