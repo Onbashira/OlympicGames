@@ -11,28 +11,32 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     float movePower = 1.0f;
     [SerializeField]
+    float boostPower = 2.0f;
+    [SerializeField]
+    float AttackPower = 5.0f;
+    [SerializeField]
     private Vector2 moveVelocity = Vector2.zero;
     [SerializeField]
-    private Vector2 velocityClamp;
+    private float velocityClamp;
     [SerializeField]
     float hoverMovePower = 1.0f;
     [SerializeField]
-    Vector2 hoverClamp;
+    private float hoverClamp;
     [SerializeField]
     private float angulerVelocity = 0.0f;
     [SerializeField]
     float torquePower = 1.0f;
     [SerializeField]
-    Vector2 torqueClamp;
-    [SerializeField]
-    float maxChargeTime = 2.0f;
+    float torqueClamp;
     [SerializeField]
     float brakeDump = 0.1f;
+    [SerializeField]
+    float brakeAngulerDump = 0.1f;
     [SerializeField]
     GamepadInput.GamePad.Index playerNo;
     [SerializeField]
     uint playerStock = 0;
-
+    Vector2 deadPos = Vector2.zero;
     [SerializeField]
     bool isDead = false;
     [SerializeField]
@@ -58,29 +62,46 @@ public class PlayerController : MonoBehaviour
     float blinkInvincibleTime = 0.4f;
     float blinkTimer = 0.0f;
     [SerializeField]
+    float attackTime = 0.5f;
+    float attackTimer = 0.0f;
+    [SerializeField]
+    float attackTime2 = 1.0f;
+    float attackTimer2 = 0.0f;
+    [SerializeField]
+    float respawnTime = 1.0f;
+    float respawnTimer = 0.0f;
+    [SerializeField]
     private GamepadInput.GamepadState gamepadState;
     [SerializeField]
     private GamepadInput.GamepadState gamepadStateOld;
-
-
     [SerializeField]
-    private float chargeTime = 0.0f;
+    AudioSource deadSE;
+    [SerializeField]
+    AudioSource boostSE;
+    [SerializeField]
+    AudioSource moveSE;
+    [SerializeField]
+    AudioSource downSE;
+    [SerializeField]
+    AudioSource slashSE;
 
     SpriteRenderer spriteRenderer = null;
 
     System.Action inputUpdater;
     System.Action moveUpdater;
     System.Action stateUpdater;
+    System.Action attackSeq;
+
+    [SerializeField]
+    CapsuleCollider2D slasherCollider = null;
 
     public void Initialized()
     {
         isCollided = false;
-        moveUpdater = Normal;
+        stateUpdater = Normal;
         moveVelocity = Vector2.zero;
         angulerVelocity = 0.0f;
         inputUpdater = GamePadStateUpdate;
-        //playerNo = (GamepadInput.GamePad.Index)0; //test
-        chargeTime = 0.0f;
         gamepadStateOld = gamepadState = GamepadInput.GamePad.GetState(playerNo);
         angulerVelocity = 0.0f;
     }
@@ -90,6 +111,8 @@ public class PlayerController : MonoBehaviour
     {
         spriteRenderer = this.gameObject.GetComponent<SpriteRenderer>();
         rigid = this.GetComponent<Rigidbody2D>();
+        //slasherCollider = this.GetComponentInChildren<CapsuleCollider2D>();
+        slasherCollider.enabled = false;
         Initialized();
     }
 
@@ -97,8 +120,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         inputUpdater();
-        moveUpdater();
-        RotatePlayer();
+        stateUpdater();
         ClampVelocity();
         ClapmAngluerVelocity();
     }
@@ -158,47 +180,36 @@ public class PlayerController : MonoBehaviour
 
     public void SetUpdaterToWait()
     {
-        moveUpdater = Wait;
+        stateUpdater = Wait;
     }
 
     public void SetUpdaterToNormal()
     {
-        moveUpdater = Normal;
+        stateUpdater = Normal;
     }
-
 
     void ClampVelocity()
     {
         moveVelocity = rigid.velocity;
-        moveVelocity.x = Mathf.Clamp(moveVelocity.x, velocityClamp.x, velocityClamp.y);
-        moveVelocity.y = Mathf.Clamp(moveVelocity.y, velocityClamp.x, velocityClamp.y);
+        moveVelocity.x = Mathf.Clamp(moveVelocity.x, -velocityClamp, velocityClamp);
+        moveVelocity.y = Mathf.Clamp(moveVelocity.y, -velocityClamp, velocityClamp);
         rigid.velocity = moveVelocity;
     }
 
     void ClapmAngluerVelocity()
     {
-        rigid.angularVelocity = Mathf.Clamp(rigid.angularVelocity, torqueClamp.x, torqueClamp.y);
+        rigid.angularVelocity = Mathf.Clamp(rigid.angularVelocity, -torqueClamp, torqueClamp);
         this.angulerVelocity = rigid.angularVelocity;
 
     }
 
     void Brake()
     {
-        Vector2 rvelo = rigid.velocity;
+        DumpBrake();
 
-        if (!(rigid.velocity.SqrMagnitude().Equals(0.0f)))
-        {
-            Vector2 dump = rvelo * brakeDump;
-            rvelo -= dump * Time.deltaTime;
-            rigid.velocity = rvelo;
-        }
-        if (rvelo.SqrMagnitude() < 0.00001f)
-        {
-            rigid.velocity = Vector2.zero;
-        }
         if (!gamepadState.B)
         {
-            moveUpdater = Normal;
+            stateUpdater = Normal;
             return;
         }
 
@@ -223,91 +234,185 @@ public class PlayerController : MonoBehaviour
 
         tempVelo.Normalize();
         tempVelo = tempVelo * hoverMovePower * Time.deltaTime;
-        tempVelo.x = Mathf.Clamp(tempVelo.x, hoverClamp.x, hoverClamp.y);
-        tempVelo.y = Mathf.Clamp(tempVelo.y, hoverClamp.x, hoverClamp.y);
+        tempVelo.x = Mathf.Clamp(tempVelo.x, -hoverClamp, hoverClamp);
+        tempVelo.y = Mathf.Clamp(tempVelo.y, -hoverClamp, hoverClamp);
 
         rigid.AddRelativeForce((tempVelo), ForceMode2D.Force);
-
+        RotatePlayer();
     }
 
-    void Boost()
+    void Move()
     {
-        chargeTime -= Time.deltaTime;
-        if (chargeTime <= 0.0f)
-        {
-            moveUpdater = Normal;
-            return;
-        }
-        Vector2 rvelo = rigid.velocity;
+        Vector2 tempVelo = (Vector2.up * movePower);
+        rigid.AddRelativeForce(tempVelo, ForceMode2D.Impulse);
+        moveVelocity = rigid.velocity;
+        stateUpdater = Normal;
+    }
 
-        Vector2 tempVelo = (Vector2.up * (float)chargeTime * movePower);
-        rigid.AddRelativeForce(tempVelo, ForceMode2D.Force);
-
+    void DumpBrake(float amount = 1.0f)
+    {
         if (!(rigid.velocity.SqrMagnitude().Equals(0.0f)))
         {
-            Vector2 dump = rigid.velocity * brakeDump;
-            rvelo -= dump * Time.deltaTime;
-            rigid.velocity = rvelo;
+            Vector2 dump = rigid.velocity * brakeDump * amount * Time.deltaTime;
+            rigid.velocity -= dump;
         }
-        if (rvelo.SqrMagnitude() < 0.00001f)
+        if (rigid.velocity.SqrMagnitude() < 0.00001f)
         {
             rigid.velocity = Vector2.zero;
-            moveUpdater = Normal;
+        }
+    }
+
+    void DumpAngleBrake(float amount = 1.0f)
+    {
+        if (!(rigid.angularVelocity.Equals(0.0f)))
+        {
+            float dump = rigid.angularVelocity * brakeAngulerDump * amount * Time.deltaTime;
+            rigid.angularVelocity -= dump;
+        }
+        if (rigid.angularVelocity < 0.0001f)
+        {
+            rigid.angularVelocity = 0.0f;
+        }
+    }
+
+    void Attack()
+    {
+        Vector2 boostVelo = (Vector2.up * boostPower);
+
+        rigid.AddRelativeForce(boostVelo, ForceMode2D.Impulse);
+
+        // StartCoroutine(AttakerUpdate(1.0f));
+        stateUpdater = AttackAction1;
+        RotatePlayer();
+    }
+
+    //急速前進減衰あり
+    void AttackAction1()
+    {
+        DumpBrake(2.0f);
+        attackTimer += Time.deltaTime;
+
+        if (attackTimer >= attackTime)
+        {
+            rigid.angularVelocity = 0.0f;
+
+
+            slasherCollider.enabled = true;
+            attackTimer = 0.0f;
+            stateUpdater = AttackAction2;
             return;
         }
     }
 
-    void Charge()
+    //切りつけ回転
+    void AttackAction2()
     {
-        if (gamepadState.A)
-        {
-            chargeTime += 1.0f * Time.deltaTime;
-            if (chargeTime >= maxChargeTime)
-            {
-                chargeTime = maxChargeTime;
-            }
-        }
+        DumpBrake(2.0f);
+        attackTimer += Time.deltaTime;
+        transform.Rotate(new Vector3(0.0f, 0.0f, 12.0f));
 
-        if (!gamepadState.A)
+        if (attackTimer >= attackTime2)
         {
-
-            Vector2 tempVelo = (Vector2.up * (float)1.0 * movePower);
-            if (chargeTime >= maxChargeTime)
-            {
-                rigid.velocity = Vector2.zero;
-            }
-            rigid.AddRelativeForce(tempVelo, ForceMode2D.Impulse);
-            chargeTime = 0.0f;
-            moveUpdater = Normal;
-            return;
+            slasherCollider.enabled = false;
+            attackTimer = 0.0f;
+            stateUpdater = Normal;
         }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        //他プレイヤーとの衝突時
-        if (collision.gameObject.tag == "Player")
+
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!isDown || !isDead || !isInvincible)
         {
-            PlayerController player = collision.gameObject.GetComponent<PlayerController>();
-            if (player.moveVelocity.SqrMagnitude() >= moveVelocity.SqrMagnitude())
+            //他プレイヤーとの衝突時
+            if (collision.gameObject.tag == "Player")
             {
-                //isDown = true;
-                //isCollided = true;
-                //moveUpdater = Downed;
-                chargeTime = 0.0f;
-                rigid.velocity += player.rigid.velocity / 2.0f;
-                player.rigid.velocity /= 2.0f;
+                PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+
+
+                if (player.moveVelocity.SqrMagnitude() >= moveVelocity.SqrMagnitude())
+                {
+
+                    rigid.velocity += player.rigid.velocity / 2.0f;
+                    player.rigid.velocity /= 2.0f;
+                }
+
+
+            }
+            //他プレイヤー攻撃との衝突時
+            if (collision.gameObject.tag == "AttackColl")
+            {
+                PlayerController player = collision.gameObject.GetComponentInParent<PlayerController>();
+
+
+
+                var vec = -(player.transform.position - this.transform.position).normalized;
+                this.rigid.velocity = vec * AttackPower;
+
+                slasherCollider.enabled = false;
+                attackTime = 0.0f;
             }
 
+
+            if (collision.gameObject.tag == "Wall") //壁との衝突時
+            {
+                slasherCollider.enabled = false;
+
+                isCollided = true;
+                --playerStock;
+                deadPos = transform.position;
+                stateUpdater = Dead;
+
+            }
         }
-        else if (collision.gameObject.tag == "BlackHole") //ギミックとの衝突時
+    }
+
+    void GameOver()
+    {
+
+    }
+
+    public void DeadPlayer()
+    {
+        enabled = false;
+    }
+
+    void Dead()
+    {
+        if (playerStock <= 0)
         {
-            Vector3 hole = collision.transform.position;
-            Vector3 vec = hole - this.transform.position;
+            stateUpdater = GameOver;
+            isDead = true;
+            GameResultManager.GetPlayerRank().Add((int)this.playerNo);
+           
+            //Destroy(this);
         }
-        else if (collision.gameObject.tag == "Wall") //壁との衝突時
+        else
         {
+            stateUpdater = Respawn;
+            isInvincible = true;
+            StartCoroutine(Invincible());
         }
+
+    }
+
+    void Respawn()
+    {
+        respawnTimer += Time.deltaTime;
+        if (respawnTimer >= 1.0f)
+        {
+            respawnTimer= 1.0f;
+            this.transform.position = Vector3.Lerp(deadPos, respownPos, respawnTimer);
+            respawnTimer = 0.0f;
+            stateUpdater = Normal;
+            return;
+        }
+        this.transform.position = Vector3.Lerp(deadPos, respownPos, respawnTimer);
+
     }
 
     void Wait()
@@ -317,20 +422,27 @@ public class PlayerController : MonoBehaviour
 
     void Normal()
     {
-        if (gamepadState.A)
+        if (gamepadState.A && !gamepadStateOld.A)
         {
-            moveUpdater = Charge;
+            stateUpdater = Move;
+            return;
+        }
+        else if (gamepadState.Y && !gamepadStateOld.Y)
+        {
+            stateUpdater = Attack;
             return;
         }
         else if (gamepadState.B && !gamepadStateOld.B)
         {
-            moveUpdater = Brake;
+            stateUpdater = Brake;
             return;
         }
+        RotatePlayer();
     }
 
     void RotatePlayer()
     {
+        //mode1
         if (gamepadState.LeftShoulder)
         {
             //rigid.AddTorque(torquePower * Time.deltaTime, ForceMode2D.Impulse);
@@ -342,92 +454,45 @@ public class PlayerController : MonoBehaviour
             //rigid.AddTorque(-torquePower * Time.deltaTime, ForceMode2D.Impulse);
             this.transform.Rotate(Vector3.forward, -torquePower * Time.deltaTime);
         }
+        //mode2
+        //{
+        //    Vector2 rotateVector = gamepadState.LeftStickAxis;
+        //    if (!rotateVector.SqrMagnitude().Equals(0.0f))
+        //    {
+        //        float angle = Mathf.Rad2Deg * Mathf.Atan2(rotateVector.y, rotateVector.x) - 90.0f;
+        //        this.transform.eulerAngles = new Vector3(0.0f, 0.0f, angle);
+        //    }
+        //}
 
     }
-
-    void Downed()
+    
+    private IEnumerator Invincible(float duration = 0.0f)
     {
-        downtimer += Time.deltaTime;
-        blinkTimer += downTime;
-        if (blinkTimer >= blinkDownTime)
-        {
-            blinkTimer = 0.0f;
-            bool flg = spriteRenderer.enabled;
-            spriteRenderer.enabled = !flg;
-        }
-        if (downtimer >= downTime)
-        {
-            isDown = false;
-            isInvincible = true;
-            spriteRenderer.enabled = true;
-            blinkTimer = 0.0f;
 
-            downtimer = 0.0f;
-            moveUpdater = Invincible;
-            return;
-        }
-        {
-            //二倍の減衰でブレーキ
-            Vector2 dump = rigid.velocity * brakeDump ;
-            rigid.velocity -= dump * Time.deltaTime;
-            if (rigid.velocity.SqrMagnitude() <= 0.001f)
-            {
-                rigid.velocity = Vector2.zero;
-            }
+        var elapsed = 0.0f;
 
-            Vector2 tempVelo = Vector2.zero;
-            if (gamepadState.Left)
-            {
-                tempVelo += Vector2.left;
-            }
-            if (gamepadState.Up)
-            {
-                tempVelo += Vector2.up;
-            }
-            if (gamepadState.Right)
-            {
-                tempVelo += Vector2.right;
-            }
-            if (gamepadState.Down)
-            {
-                tempVelo += Vector2.down;
-            }
-            tempVelo.Normalize();
-            tempVelo *= hoverMovePower * Time.deltaTime;
-            tempVelo.x = Mathf.Clamp(tempVelo.x, hoverClamp.x, hoverClamp.y);
-            tempVelo.y = Mathf.Clamp(tempVelo.y, hoverClamp.x, hoverClamp.y);
-
-            rigid.AddRelativeForce((tempVelo * movePower), ForceMode2D.Force);
-        }
-    }
-
-    void Invincible()
-    {
-        invincibleTimer += Time.deltaTime;
-        blinkTimer += invincibleTimer;
-        if (blinkTimer >= blinkInvincibleTime)
+        while (elapsed < invincibleTime)
         {
-            blinkTimer = 0.0f;
-            bool flg = spriteRenderer.enabled;
-            spriteRenderer.enabled = !flg;
+            elapsed += Time.deltaTime;
+            blinkTimer += Time.deltaTime;
+            if (blinkTimer >= blinkInvincibleTime)
+            {
+                blinkTimer = 0.0f;
+                bool flg = spriteRenderer.enabled;
+                spriteRenderer.enabled = !flg;
+            }
+            yield return null;
         }
-        if (invincibleTimer >= invincibleTime)
-        {
-            spriteRenderer.enabled = true;
-            blinkTimer = 0.0f;
-            isInvincible = false;
-            invincibleTimer = 0.0f;
-            moveUpdater = Normal;
-        }
+        spriteRenderer.enabled = true;
+        isInvincible = false;
+        blinkTimer = 0.0f;
     }
 
     void GamePadStateUpdate()
     {
         gamepadStateOld = gamepadState;
 
-        gamepadState = GamepadInput.GamePad.GetState(playerNo);
+        gamepadState = GamepadInput.GamePad.GetState(playerNo, true);
 
     }
-
-
 }

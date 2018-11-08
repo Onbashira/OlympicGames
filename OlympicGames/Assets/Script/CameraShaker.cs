@@ -11,7 +11,7 @@ public class CameraShaker : MonoBehaviour {
 
     private IEnumerator DoShake(float duration, float magnitude)
     {
-        var pos = transform.localPosition;
+        var pos =  new Vector3(0.0f,0.0f,-10.0f);
 
         var elapsed = 0f;
 

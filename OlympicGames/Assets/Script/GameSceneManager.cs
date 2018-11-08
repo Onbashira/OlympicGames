@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Sprites;
+using UnityEngine.SceneManagement;
 
 public class GameSceneManager : MonoBehaviour
 {
@@ -59,19 +60,19 @@ public class GameSceneManager : MonoBehaviour
     [SerializeField]
     CameraShaker shaker = null;
 
+    private uint maxPlayer;
+    private uint deadCount;
 
     // Use this for initialization
     void Start()
     {
         Initialize();
-
     }
 
     // Update is called once per frame
     void Update()
     {
         gameUpdater();
-
     }
 
     void Initialize()
@@ -85,14 +86,14 @@ public class GameSceneManager : MonoBehaviour
         //Lutが必要
         //Test
 
-        for (int i = 0; i < ModeSetting.player_data.Count; i++)
-        {
-												ModeSetting.PlayerData pd = ModeSetting.player_data[i];
-												pd.color = (ModeSetting.ColorIndex)i;
-												pd.handicap = 2;
-												pd.is_connected = false;
-												pd.player_number = (int)(i + 1);
-        }
+        //for (int i = 0; i < ModeSetting.player_data.Count; i++)
+        //{
+        //    ModeSetting.PlayerData pd = ModeSetting.player_data[i];
+        //    pd.color = (ModeSetting.ColorIndex)i;
+        //    pd.handicap = 2;
+        //    pd.is_connected = false;
+        //    pd.player_number = (int)(i + 1);
+        //}
 
         foreach (var pl in ModeSetting.player_data)
         {
@@ -103,8 +104,9 @@ public class GameSceneManager : MonoBehaviour
             players[players.Count - 1].GetComponent<PlayerController>().SetRespownParamater(respawnParamaters[pl.player_number].pos, respawnParamaters[pl.player_number].rotation);
             players[players.Count - 1].GetComponent<PlayerController>().SetUpdaterToWait();
             players[players.Count - 1].GetComponent<SpriteRenderer>().sprite = this.characterTextures[(int)pl.color];
-            //players.Add(playerObj);
         }
+        maxPlayer = (uint)players.Count;
+        deadCount = 0;
         gameUpdater = GameUpdateFadeIn;
         fade.FadeIn(maxFadeUpdateTime, () =>
         {
@@ -154,6 +156,16 @@ public class GameSceneManager : MonoBehaviour
                 p.CollReset();
                 break;
             }
+            if (p.IsDead())
+            {
+                p.DeadPlayer();
+                ++deadCount;
+                if (deadCount >= maxPlayer)
+                {
+                    gameUpdater = GameUpdateGameSet;
+                    return;
+                }
+            }
         }
     }
 
@@ -192,7 +204,8 @@ public class GameSceneManager : MonoBehaviour
     {
         if (fade.IsFadeOutCompleted())
         {
-            //次のシーンの読み込み
+            GameResultManager.GetPlayerRank().Reverse();
+            SceneManager.LoadScene("Result");
 
         }
     }
