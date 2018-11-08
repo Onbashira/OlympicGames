@@ -84,7 +84,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4739055992133538}
   - component: {fileID: 70081906048927556}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: attackColl
   m_TagString: AttackColl
   m_Icon: {fileID: 0}
@@ -124,7 +124,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1430210945632414}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.76, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.00005, y: 0.00005, z: 1}
   m_Children:
   - {fileID: 4878901629258342}
@@ -189,7 +189,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 34.35, y: 0}
@@ -223,6 +223,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movePower: 0.2
   boostPower: 2
+  AttackPower: 5
   moveVelocity: {x: 0, y: 0}
   velocityClamp: 0.9
   hoverMovePower: 10
@@ -241,10 +242,12 @@ MonoBehaviour:
   respownPos: {x: 0, y: 0}
   respownRotate: 0
   downTime: 0.5
-  invincibleTime: 1.5
+  invincibleTime: 2
   blinkDownTime: 0.2
-  blinkInvincibleTime: 0.4
+  blinkInvincibleTime: 0.001
   attackTime: 0.3
+  attackTime2: 0.59
+  respawnTime: 1
   deadSE: {fileID: 0}
   boostSE: {fileID: 0}
   moveSE: {fileID: 0}
