@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     float boostPower = 2.0f;
     [SerializeField]
+    float AttackPower = 5.0f;
+    [SerializeField]
     private Vector2 moveVelocity = Vector2.zero;
     [SerializeField]
     private float velocityClamp;
@@ -367,7 +369,8 @@ public class PlayerController : MonoBehaviour
         {
             var player = collision.gameObject.GetComponentInParent<PlayerController>();
             var vec = -(player.transform.position - this.transform.position).normalized;
-            this.rigid.velocity = vec;
+            this.rigid.velocity = vec * AttackPower;
+            isCollided = true;
             stateUpdater = Downed;
             slasherCollider.enabled = false;
             Downed();

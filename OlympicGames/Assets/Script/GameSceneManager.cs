@@ -87,11 +87,11 @@ public class GameSceneManager : MonoBehaviour
 
         for (int i = 0; i < ModeSetting.player_data.Count; i++)
         {
-												ModeSetting.PlayerData pd = ModeSetting.player_data[i];
-												pd.color = (ModeSetting.ColorIndex)i;
-												pd.handicap = 2;
-												pd.is_connected = false;
-												pd.player_number = (int)(i + 1);
+            ModeSetting.PlayerData pd = ModeSetting.player_data[i];
+            pd.color = (ModeSetting.ColorIndex)i;
+            pd.handicap = 2;
+            pd.is_connected = false;
+            pd.player_number = (int)(i + 1);
         }
 
         foreach (var pl in ModeSetting.player_data)
