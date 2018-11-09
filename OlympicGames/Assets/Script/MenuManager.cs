@@ -248,15 +248,15 @@ public class MenuManager : MonoBehaviour
 								player_carsor.carsor_prafab.transform.Find("LeftUpCarsor").GetComponent<RectTransform>().localPosition =
 												new Vector3
 												(
-																-size.x / 2,
-																size.y / 2,
+																-size.x / 6,
+																size.y / 6,
 																0.0f
 												);
 								player_carsor.carsor_prafab.transform.Find("RightDownCarsor").GetComponent<RectTransform>().localPosition =
 												new Vector3
 												(
-																size.x / 2,
-																-size.y / 2,
+																size.x / 6,
+																-size.y / 6,
 																0.0f
 												);
 				}
