@@ -62,6 +62,7 @@ public class MenuManager : MonoBehaviour
 				{
 								stock_set = transform.Find("Stock").GetComponent<StockSetting>();
 
+								MenuState = FadeInSystem;
 								Initialized();
 								ModeSetting.initialized();
 								ModeSetting.ConnectedUpdate();
@@ -74,7 +75,6 @@ public class MenuManager : MonoBehaviour
 				void Update()
 				{
 								ModeSetting.ConnectedUpdate();
-
 								MenuState();
 								return;
 				}
@@ -208,8 +208,11 @@ public class MenuManager : MonoBehaviour
 				{
 								if (gamepad_state.A && !gamepad_state_old.A)
 								{
-												//誰かがスタートボタンを押しました
-												MenuState = FadeEnd;
+												if(ModeSetting.player_data.Count >=2)
+												{
+																//誰かがスタートボタンを押しました
+																MenuState = FadeEnd;
+												}
 												return;
 								}
 								if (gamepad_state.Up && !gamepad_state_old.Up)
