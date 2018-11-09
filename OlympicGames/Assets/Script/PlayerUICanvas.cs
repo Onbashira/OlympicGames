@@ -21,7 +21,8 @@ public class PlayerUICanvas : MonoBehaviour {
     RectTransform  rectTransform = null;
 
     // Use this for initialization
-    void Start () {
+    void Start ()
+				{
 
     }
     public void Initialized()

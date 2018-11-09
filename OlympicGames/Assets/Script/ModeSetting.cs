@@ -39,7 +39,7 @@ public class ModeSetting : MonoBehaviour
 				public enum ConnectState { ON, OFF, NON };
 
 				//プレイヤーのカラーの順番
-				public enum ColorIndex { GREEN, ORANGE, PINK, PURPLE, RED, BLUE, WHITE, YELLOW };
+				public enum ColorIndex { WHITE, RED, BLUE, YELLOW,GREEN, ORANGE, PINK, PURPLE };
 				private const int k_color_num_max = 7;//キャラのカラー最大値
 				private const int k_color_num_min = 0;        //カラー最小値
 
@@ -221,18 +221,13 @@ public class ModeSetting : MonoBehaviour
 
 				private static void CleateNewPlayer(int new_number)
 				{
-								if(new_number == 0)
-								{
-												//接続0のコントローラーのデータでプレイヤーを作成しません
-												return;
-								}
 								if (player_data.Count >= k_player_num_max)
 								{
 												//プレイヤーの数が限界突破した
 												return;
 								}
 								PlayerData pd = new PlayerData();
-								pd.player_number = new_number;
+								pd.player_number = new_number + 1;
 								player_data.Add(pd);
 								ChangePlayerColor(player_data.Count - 1, 1);
 				}

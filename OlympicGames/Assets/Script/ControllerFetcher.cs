@@ -20,7 +20,7 @@ public static class ControllerFetcher
 
 								//既に接続されているものから名前があるもの（現在接続されているもの）の数を抽出
 								//0は全部の入力のため排除
-								for (int i = 1; i < controllerNames.Length; i++)
+								for (int i = 0; i < controllerNames.Length; i++)
         {
 												if (controllerNames[i] != "")
 												{
