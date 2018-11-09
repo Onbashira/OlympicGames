@@ -124,7 +124,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1430210945632414}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.62, y: 0.46, z: 0}
+  m_LocalPosition: {x: 0.683, y: 0.026, z: 0}
   m_LocalScale: {x: 0.00005, y: 0.00005, z: 1}
   m_Children:
   - {fileID: 4878901629258342}
@@ -254,12 +254,13 @@ MonoBehaviour:
   moveSE: {fileID: 0}
   downSE: {fileID: 0}
   slashSE: {fileID: 0}
-  DeadResourceName: 
+  DeadResourceName: DeadEffect
   ColdResourceName: 
   Attack1ResourceName: 
   Attack2ResourceName: 
-  MoveResourceName: 
-  InvincibleResourceName: 
+  AttackReCasttEffectResourceName: RecastEffect
+  MoveResourceName: BoostEffect
+  InvincibleResourceName: InvicibleEffect
   spriteRenderer: {fileID: 0}
   slasherCollider: {fileID: 70081906048927556}
 --- !u!212 &212550029642299932
