@@ -280,8 +280,7 @@ public class MenuManager : MonoBehaviour
 												//リストに格納されているもの順に調べる
 
 												///ここでコントローラーの番号を+1すること
-
-												gamepad_state =	GamePad.GetState((GamePad.Index)ModeSetting.player_data[i].player_number);
+												gamepad_state =	GamePad.GetState((GamePad.Index)ModeSetting.player_data[i].player_number + 1);
 												break;
 								}
 				}

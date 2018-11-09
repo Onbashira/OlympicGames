@@ -60,7 +60,7 @@ public class ModeSetting : MonoBehaviour
 				{
 								PlayerData pd;
 								pd.handicap = 0;
-								pd.color = ColorIndex.GREEN;
+								pd.color = ColorIndex.WHITE;
 								pd.player_number = 0;
 								pd.is_connected = false;
 								return pd;
@@ -227,7 +227,7 @@ public class ModeSetting : MonoBehaviour
 												return;
 								}
 								PlayerData pd = new PlayerData();
-								pd.player_number = new_number + 1;
+								pd.player_number = new_number;
 								player_data.Add(pd);
 								ChangePlayerColor(player_data.Count - 1, 1);
 				}
