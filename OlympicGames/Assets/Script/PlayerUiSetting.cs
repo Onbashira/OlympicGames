@@ -9,12 +9,16 @@ public class PlayerUiSetting : MonoBehaviour
 				private RawImage player_ui;
 				private Text player_color_text;//プレイヤーのカラーのテキスト
 				public int player_number = 0;//プレイヤーのナンバー
-				
+
+				private RawImage p_image;
+				public Sprite[] player_ui_sprite;
+
 				private void Start()
 				{
-								player_color = ModeSetting.ColorIndex.GREEN;
+								player_color = ModeSetting.ColorIndex.WHITE;
 								player_ui = transform.parent.GetComponent<RawImage>();
 								player_color_text = transform.Find("Texter").GetComponent<Text>();
+								p_image = transform.Find("PlayerFram").GetComponent<RawImage>();
 				}
 				
 				void Update()
@@ -23,9 +27,10 @@ public class PlayerUiSetting : MonoBehaviour
 								{
 												return;
 								}
-								if (player_color != ModeSetting.player_data[player_number].color)
+								ModeSetting.ColorIndex color = ModeSetting.player_data[player_number].color;
+								if (player_color != color)
 								{
-												player_color = ModeSetting.player_data[player_number].color;
+												player_color = color;
 												player_color_text.text =
 												ModeSetting.player_data[player_number].color.ToString();
 								}
