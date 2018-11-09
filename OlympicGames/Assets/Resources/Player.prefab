@@ -255,9 +255,9 @@ MonoBehaviour:
   downSE: {fileID: 0}
   slashSE: {fileID: 0}
   DeadResourceName: DeadEffect
-  ColdResourceName: 
-  Attack1ResourceName: 
-  Attack2ResourceName: 
+  ColdResourceName: ColEffect
+  Attack1ResourceName: AttackEffect
+  Attack2ResourceName: Attack2Effect
   AttackReCasttEffectResourceName: RecastEffect
   MoveResourceName: BoostEffect
   InvincibleResourceName: InvicibleEffect

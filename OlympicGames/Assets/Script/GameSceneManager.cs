@@ -190,8 +190,7 @@ public class GameSceneManager : MonoBehaviour
             {
                 AllPlayerWait();
                 gameUpdater = GameUpdateGameSet;
-                gameSetCatin = Instantiate((GameObject)Resources.Load("GameSetCatin"),playerCanvasController.transform);
-
+                gameSetCatin = Instantiate((GameObject)Resources.Load("GameSetCatin"), playerCanvasController.transform);
                 return;
             }
         }
