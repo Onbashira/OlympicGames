@@ -132,22 +132,25 @@ public class ModeSetting : MonoBehaviour
 								}
 				}
 
-
 				//コントローラーの繋がりを確認する
 				public static void ConnectedUpdate()
 				{
 								ControllerFetcher.Initialize();
 
-								//一つ前の時の確認と比べてプレイヤーの総数が変わっているかの確認をする
-								if (ControllerFetcher.GetMaxConectedController() > ControllerFetcher.GetMaxConectedControllerOld())
+								//コントローラー数が同じになるまで処理
+								while((int)ControllerFetcher.GetMaxConectedController() != player_data.Count)
 								{
-												//コントローラーの数が増えた
-												PlusPlayer();
-								}
-								else if (ControllerFetcher.GetMaxConectedController() < ControllerFetcher.GetMaxConectedControllerOld())
-								{
-												//減った
-												DaletePlayer();
+												//一つ前の時の確認と比べてプレイヤーの総数が変わっているかの確認をする
+												if (ControllerFetcher.GetMaxConectedController() > player_data.Count)
+												{
+																//コントローラーの数が増えた
+																PlusPlayer();
+												}
+												else if (ControllerFetcher.GetMaxConectedController() < player_data.Count)
+												{
+																//減った
+																DaletePlayer();
+												}
 								}
 								//何も変わらなかった
 				}
