@@ -260,7 +260,7 @@ MonoBehaviour:
   Attack2ResourceName: Attack2Effect
   AttackReCasttEffectResourceName: RecastEffect
   MoveResourceName: BoostEffect
-  InvincibleResourceName: InvicibleEffect
+  InvincibleResourceName: DeadEffect
   spriteRenderer: {fileID: 0}
   slasherCollider: {fileID: 70081906048927556}
 --- !u!212 &212550029642299932

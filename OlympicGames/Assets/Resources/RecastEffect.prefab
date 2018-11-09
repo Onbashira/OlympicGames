@@ -73,6 +73,8 @@ GameObject:
   - component: {fileID: 198875035969753728}
   - component: {fileID: 199035332800445096}
   - component: {fileID: 82099268641994306}
+  - component: {fileID: 114865881487737140}
+  - component: {fileID: 114998436960883358}
   m_Layer: 0
   m_Name: RecastEffect
   m_TagString: Untagged
@@ -291,6 +293,28 @@ MonoBehaviour:
   flashingOff: 0
   flashingOffPower: 0
   flashingOffIntensity: 1
+--- !u!114 &114865881487737140
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1987690305466948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80df94552bc265f4ba636bf0588d2823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114998436960883358
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1987690305466948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80df94552bc265f4ba636bf0588d2823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!198 &198136785429990340
 ParticleSystem:
   m_ObjectHideFlags: 1

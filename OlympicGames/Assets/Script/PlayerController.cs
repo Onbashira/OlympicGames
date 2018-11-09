@@ -34,7 +34,6 @@ public class PlayerController : MonoBehaviour
     float brakeAngulerDump = 0.1f;
     [SerializeField]
     GamepadInput.GamePad.Index playerNo;
-    [SerializeField]
     public uint playerStock = 0;
     Vector2 deadPos = Vector2.zero;
     Vector3 deadRotation = Vector3.zero;
@@ -421,7 +420,7 @@ public class PlayerController : MonoBehaviour
 
             if (collision.gameObject.tag == "Wall") //壁との衝突時
             {
-                Instantiate(Resources.Load(ColdResourceName), this.transform.position, this.transform.rotation);
+                Instantiate(Resources.Load(ColdResourceName), this.transform);
 
 
                 slasherCollider.enabled = false;
@@ -452,7 +451,6 @@ public class PlayerController : MonoBehaviour
 
     void Dead()
     {
-        Instantiate(Resources.Load(DeadResourceName), this.transform.position, this.transform.rotation);
 
         if (playerStock <= 0)
         {
@@ -464,6 +462,8 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            Instantiate(Resources.Load(DeadResourceName), this.transform.position,this.transform.rotation);
+
             this.rigid.velocity = Vector2.zero;
             stateUpdater = Respawn;
             isInvincible = true;
@@ -545,7 +545,6 @@ public class PlayerController : MonoBehaviour
     {
 
         var elapsed = 0.0f;
-        var effect = Instantiate((GameObject)Resources.Load(InvincibleResourceName), this.transform).GetComponent<ParticleSystem>();
 
         while (elapsed < invincibleTime)
         {
@@ -558,10 +557,6 @@ public class PlayerController : MonoBehaviour
                 spriteRenderer.enabled = !flg;
             }
             yield return null;
-        }
-        if (effect.IsAlive(true))
-        {
-            Destroy(effect);
         }
         spriteRenderer.enabled = true;
         isInvincible = false;

@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 198254978539754752}
   - component: {fileID: 199290996095355328}
   - component: {fileID: 82586468121875358}
+  - component: {fileID: 114336592701938614}
   m_Layer: 0
   m_Name: ColEffect
   m_TagString: Untagged
@@ -137,6 +138,17 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &114336592701938614
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1280641512912912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80df94552bc265f4ba636bf0588d2823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!198 &198254978539754752
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -144,7 +156,7 @@ ParticleSystem:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1280641512912912}
   serializedVersion: 5
-  lengthInSec: 2
+  lengthInSec: 1
   simulationSpeed: 1
   stopAction: 0
   looping: 0

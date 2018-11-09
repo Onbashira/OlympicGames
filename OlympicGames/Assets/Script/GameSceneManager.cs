@@ -99,6 +99,7 @@ public class GameSceneManager : MonoBehaviour
             players[players.Count - 1].GetComponent<PlayerController>().SetPlayerNO(pl.player_number + 1);
             players[players.Count - 1].GetComponent<PlayerController>().SetRespownParamater(respawnParamaters[pl.player_number + 1].pos, respawnParamaters[pl.player_number + 1].rotation);
             players[players.Count - 1].GetComponent<PlayerController>().SetUpdaterToWait();
+            players[players.Count - 1].GetComponent<PlayerController>().playerStock = 3 + (uint)ModeSetting.GetRemaining();
             players[players.Count - 1].GetComponent<SpriteRenderer>().sprite = this.characterTextures[(int)pl.color];
 
             playerCanvasController.CreatPlayerCanvas(players[players.Count - 1].GetComponent<PlayerController>());

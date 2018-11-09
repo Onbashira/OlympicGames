@@ -6,7 +6,8 @@ using UnityEngine.Rendering;
 
 
 
-public class PlayerUICanvas : MonoBehaviour {
+public class PlayerUICanvas : MonoBehaviour
+{
 
     [SerializeField]
     private uint playerStock = 0;
@@ -18,11 +19,11 @@ public class PlayerUICanvas : MonoBehaviour {
     Text text = null;
 
     [SerializeField]
-    RectTransform  rectTransform = null;
+    RectTransform rectTransform = null;
 
     // Use this for initialization
-    void Start ()
-				{
+    void Start()
+    {
 
     }
     public void Initialized()
@@ -32,7 +33,8 @@ public class PlayerUICanvas : MonoBehaviour {
         rectTransform = this.GetComponent<RectTransform>();
     }
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
         text.text = "" + playerStock;
     }
 
@@ -41,7 +43,7 @@ public class PlayerUICanvas : MonoBehaviour {
         image.sprite = sprite;
     }
 
-    public void SetPos(float x,float y)
+    public void SetPos(float x, float y)
     {
         rectTransform.position = new Vector3(x, y, 0.0f);
     }

@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 198669936299985568}
   - component: {fileID: 199794280822539388}
   - component: {fileID: 82897952442837108}
+  - component: {fileID: 114613718513394930}
   m_Layer: 0
   m_Name: DeadEffect
   m_TagString: Untagged
@@ -235,6 +236,17 @@ Light:
   m_UseColorTemperature: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &114613718513394930
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1415885876110644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80df94552bc265f4ba636bf0588d2823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!198 &198209915700957824
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -245,7 +257,7 @@ ParticleSystem:
   lengthInSec: 2
   simulationSpeed: 1
   stopAction: 0
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
@@ -4760,7 +4772,7 @@ ParticleSystem:
   lengthInSec: 2
   simulationSpeed: 1
   stopAction: 0
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0

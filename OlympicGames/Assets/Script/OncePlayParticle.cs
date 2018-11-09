@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class OncePlayParticle : MonoBehaviour {
 
-    ParticleSystem ptSys = null;
+    ParticleSystem ptSys;
 	// Use this for initialization
 	void Start () {
         ptSys = this.GetComponent<ParticleSystem>();
@@ -12,8 +12,13 @@ public class OncePlayParticle : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (ptSys.IsAlive(true) || ptSys.isStopped) {
-            Destroy(this);
+
+        if (ptSys == null)
+        {
+            return;
+        }
+        else if (ptSys.isStopped) {
+            Destroy(this.gameObject);
         }
 
     }
