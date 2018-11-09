@@ -138,8 +138,14 @@ public class ModeSetting : MonoBehaviour
 								ControllerFetcher.Initialize();
 
 								//コントローラー数が同じになるまで処理
-								while((int)ControllerFetcher.GetMaxConectedController() != player_data.Count)
+								for (int i = 0; i < ControllerFetcher.GetMaxConectedController(); i++)
 								{
+												if(ControllerFetcher.GetMaxConectedController() == player_data.Count)
+												{
+																//プレイヤーの接続の確認を完了しました
+																return;
+												}
+
 												//一つ前の時の確認と比べてプレイヤーの総数が変わっているかの確認をする
 												if (ControllerFetcher.GetMaxConectedController() > player_data.Count)
 												{
@@ -159,8 +165,10 @@ public class ModeSetting : MonoBehaviour
 				{
 								//新しくコントローラーが追加された
 								string[] connect_data = ControllerFetcher.GetConnectedData();
+				
 								for(int i = 0;i < connect_data.Length; i++)
 								{
+												bool is_same = false;
 												if(connect_data[i] == "")
 												{
 																//なんもつながっとらん
@@ -172,10 +180,16 @@ public class ModeSetting : MonoBehaviour
 																if( player_data[j].player_number ==  i )
 																{
 																				//既に繋がっていたコントローラーだった
-																				continue;
+																				is_same = true;
+																				break;
 																}
 												}
+												if(is_same)
+												{
+																continue;
+												}
 												//新しい繋がりを確認しました
+
 												CleateNewPlayer(i);
 												return;
 								}

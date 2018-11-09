@@ -16,7 +16,6 @@ public class SceneChangeToMenu : MonoBehaviour
 				// Use this for initialization
 				void Start()
 				{
-								ModeSetting.initialized();
 								fade_end = FadeOutChack;
 				}
 
@@ -24,21 +23,17 @@ public class SceneChangeToMenu : MonoBehaviour
 				{
 								if (GamepadInput.GamePad.GetButton(GamepadInput.GamePad.Button.A, (GamepadInput.GamePad.Index)0))
 								{
+												fade.FadeOut(maxFadeUpdateTime, () =>
+												{
+																fade_end = FadeOutEnd;
+												});
 												fade_end = FadeOut;
 								}
 				}
 
 				void FadeOut()
 				{
-								if(is_fade_play)
-								{
-												return;
-								}
-								is_fade_play = true;
-								fade.FadeOut(maxFadeUpdateTime, () =>
-								{
-												fade_end = FadeOutEnd;
-								});
+								
 				}
 
 				void FadeOutEnd()

@@ -12,6 +12,14 @@ using UnityEngine.SceneManagement;
 //のメニュー状態での処理
 public class MenuManager : MonoBehaviour
 {
+
+				[SerializeField, Tooltip("GameUpdatePreUpdateで要する時間を秒単位で指定")]
+				private float maxFadeUpdateTime = 1.0f; //一秒
+				[SerializeField]
+				private Fade fade = null;
+
+				System.Action MenuState;
+
 				//メニュー構成 どのメニューを選択しているか
 				//左上　STOCK,　右上　GIMICK,　中心　PLAYER,　右下　SETEND
 				enum MenuUI { STOCK, PLAYER1, PLAYER2, PLAYER3, PLAYER4, SETEND };
@@ -53,8 +61,10 @@ public class MenuManager : MonoBehaviour
 				private void Start()
 				{
 								stock_set = transform.Find("Stock").GetComponent<StockSetting>();
-								
+
 								Initialized();
+								ModeSetting.initialized();
+								ModeSetting.ConnectedUpdate();
 								for (int i = 0; i < ModeSetting.k_player_num_max; i++)
 								{
 												gamepad_state = gamepad_state_old = GamePad.GetState((GamePad.Index)0);
@@ -64,24 +74,15 @@ public class MenuManager : MonoBehaviour
 				void Update()
 				{
 								ModeSetting.ConnectedUpdate();
-								if (!is_menu_end)
-								{
-												//セレクトの処理がまだ終わっていません
-												GamepadStateUpdate();
-												PlayerUpdate();
-								}
-								else
-								{
-												//セレクトでの処理が終わりました
-												//フェードインが終わり次第シーンを変えます
-												SceneManager.LoadScene("GameMain");
-												return;
-								}
+
+								MenuState();
+								return;
 				}
 
 				//プレイヤーの行動
 				private void PlayerUpdate()
 				{
+								GamepadStateUpdate();
 								if (ModeSetting.player_data.Count == 0)
 								{
 												//コントローラーとの接続が絶たれています
@@ -136,7 +137,7 @@ public class MenuManager : MonoBehaviour
 
 				private void PlayerUiBehavior()
 				{
-								if(ModeSetting.player_data.Count == 0)
+								if (ModeSetting.player_data.Count == 0)
 								{
 												//なにも接続されていない
 												Debug.Log("１Pの接続を確認できません");
@@ -208,7 +209,7 @@ public class MenuManager : MonoBehaviour
 								if (gamepad_state.A && !gamepad_state_old.A)
 								{
 												//誰かがスタートボタンを押しました
-												is_menu_end = true;
+												MenuState = FadeEnd;
 												return;
 								}
 								if (gamepad_state.Up && !gamepad_state_old.Up)
@@ -225,11 +226,11 @@ public class MenuManager : MonoBehaviour
 				private void SetCarsorPos()
 				{
 								RectTransform raw;
-								if(player_carsor.menu_ui == MenuUI.STOCK)
+								if (player_carsor.menu_ui == MenuUI.STOCK)
 								{
 												raw = stock_ui_data;
 								}
-								else if(player_carsor.menu_ui == MenuUI.PLAYER1 ||
+								else if (player_carsor.menu_ui == MenuUI.PLAYER1 ||
 																player_carsor.menu_ui == MenuUI.PLAYER2 ||
 																player_carsor.menu_ui == MenuUI.PLAYER3 ||
 																player_carsor.menu_ui == MenuUI.PLAYER4)
@@ -268,7 +269,7 @@ public class MenuManager : MonoBehaviour
 								player_carsor.menu_ui = MenuUI.PLAYER1;
 								SetCarsorPos();//初期座標に調整
 				}
-				
+
 				//コントローラーの入力が行われたタイミングをとるために
 				//比べるデータの作成
 				void GamepadStateUpdate()
@@ -280,8 +281,30 @@ public class MenuManager : MonoBehaviour
 												//リストに格納されているもの順に調べる
 
 												///ここでコントローラーの番号を+1すること
-												gamepad_state =	GamePad.GetState((GamePad.Index)ModeSetting.player_data[i].player_number + 1);
+												gamepad_state = GamePad.GetState((GamePad.Index)ModeSetting.player_data[i].player_number + 1);
 												break;
 								}
+				}
+				void FadeInSystem()
+				{
+								MenuState = Fades;
+
+								fade.FadeIn(maxFadeUpdateTime, () =>
+								{
+												MenuState = PlayerUpdate;
+								});
+				}
+
+				void Fades()
+				{
+
+				}
+				void FadeEnd()
+				{
+								MenuState = Fades;
+								fade.FadeOut(maxFadeUpdateTime, () =>
+								{
+												SceneManager.LoadScene("GameMain");
+								});
 				}
 }
